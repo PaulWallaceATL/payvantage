@@ -1,103 +1,72 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { motion, useInView } from "motion/react";
+import { CircleCheck, Shield, Wallet, Zap } from "lucide-react";
+import { motion } from "motion/react";
+import { type ReactNode } from "react";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-type Stat = {
-  value: number;
-  suffix: string;
-  prefix?: string;
-  label: string;
-};
-
-const stats: Stat[] = [
-  { value: 5, suffix: "B+", prefix: "$", label: "Processed annually" },
-  { value: 99.9, suffix: "%", label: "Uptime guarantee" },
-  { value: 150, suffix: "+", label: "Countries supported" },
-  { value: 2, suffix: "M+", label: "Active users" },
+const pillars: { icon: typeof Shield; title: string; body: string }[] = [
+  {
+    icon: Shield,
+    title: "Zero chargebacks on the crypto rail",
+    body: "Card-to-crypto settlement in USDC on Polygon is final by design—no card-network reversals.",
+  },
+  {
+    icon: Wallet,
+    title: "Liquidity where you control it",
+    body: "Funds land in the wallet you specify so you can move, hold, or convert on your timeline.",
+  },
+  {
+    icon: Zap,
+    title: "Settlement at the speed of the chain",
+    body: "Stop waiting on multi-day batches when each payment can settle as USDC when it clears.",
+  },
+  {
+    icon: CircleCheck,
+    title: "Built for honest expectations",
+    body: "We focus on what the product does today for high-risk merchants—not inflated volume claims.",
+  },
 ];
-
-function AnimatedCounter({
-  value,
-  suffix,
-  prefix = "",
-  duration = 2000,
-}: {
-  value: number;
-  suffix: string;
-  prefix?: string;
-  duration?: number;
-}): ReactNode {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const hasAnimated = useRef(false);
-
-  useEffect(() => {
-    if (!isInView || hasAnimated.current) return;
-    hasAnimated.current = true;
-
-    const startTime = performance.now();
-    const isDecimal = value % 1 !== 0;
-
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      // Ease out cubic
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      const currentValue = easeOut * value;
-
-      setCount(isDecimal ? Math.round(currentValue * 10) / 10 : Math.floor(currentValue));
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        setCount(value);
-      }
-    };
-
-    requestAnimationFrame(animate);
-  }, [isInView, value, duration]);
-
-  return (
-    <span ref={ref} className="tabular-nums">
-      {prefix}
-      {count.toLocaleString("en-US", {
-        minimumFractionDigits: value % 1 !== 0 ? 1 : 0,
-        maximumFractionDigits: 1,
-      })}
-      {suffix}
-    </span>
-  );
-}
 
 export function Stats(): ReactNode {
   return (
-    <section className="relative w-full bg-muted pb-16 sm:pb-20 overflow-hidden">
+    <section className="relative w-full overflow-hidden bg-muted pb-20 pt-12 sm:pb-24 sm:pt-16">
       <div className="relative mx-auto max-w-7xl px-6 sm:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-          {stats.map((stat, index) => (
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.45, ease }}
+          className="mx-auto mb-12 max-w-2xl text-center font-serif text-xl font-medium leading-snug text-foreground sm:text-2xl"
+        >
+          Credibility through clarity: irreversible settlement, instant USDC to
+          your Polygon wallet, and messaging you can stand behind.
+        </motion.p>
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:gap-14">
+          {pillars.map((pillar, index) => (
             <motion.div
-              key={stat.label}
+              key={pillar.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 * index, ease }}
-              className="flex flex-col items-center text-center"
+              transition={{ duration: 0.5, delay: 0.08 * index, ease }}
+              className="flex gap-4"
             >
-              <div className="text-4xl sm:text-5xl lg:text-6xl font-medium font-serif tracking-tight text-foreground mb-2">
-                <AnimatedCounter
-                  value={stat.value}
-                  suffix={stat.suffix}
-                  prefix={stat.prefix ?? ""}
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-background">
+                <pillar.icon
+                  className="h-5 w-5 text-foreground/80"
+                  aria-hidden="true"
                 />
               </div>
-              <p className="text-sm sm:text-base text-foreground/70">
-                {stat.label}
-              </p>
+              <div>
+                <h3 className="text-base font-semibold text-foreground">
+                  {pillar.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {pillar.body}
+                </p>
+              </div>
             </motion.div>
           ))}
         </div>

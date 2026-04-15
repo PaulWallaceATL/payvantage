@@ -25,17 +25,17 @@ const faqs: FAQItem[] = [
   {
     question: "What are the fees?",
     answer:
-      "Our standard rate is 2.9% + $0.30 per transaction. There are no monthly fees, no setup fees, and no rolling reserves. Enterprise merchants with high volume can contact us for custom pricing.",
+      "High-risk categories such as peptides, supplements, and nutraceuticals are typically 6% per transaction with no monthly fee, no setup cost, and no separate per-transaction dollar add-on. Standard and lower-risk merchants are priced below 6% based on industry and volume—discussed on a quick call. There are no monthly minimums or equipment fees bundled into our published structure.",
   },
   {
     question: "How fast is settlement?",
     answer:
-      "Most payments are settled to your stablecoin wallet within 5 minutes of the customer completing checkout. Compare that to 30+ days with traditional high-risk processors.",
+      "On the card-to-crypto rail, USDC can be sent to your Polygon wallet as each transaction completes, without the multi-day settlement windows common in legacy high-risk processing.",
   },
   {
     question: "Do I need underwriting approval?",
     answer:
-      "No. Because payments settle in stablecoins rather than through traditional banking rails, there is no underwriting process. Sign up, connect your wallet, and start accepting payments in minutes.",
+      "On the card-to-crypto rail there is no paperwork required upfront to get oriented—book a call and we will confirm fit. If you apply for traditional card processing instead, our processor partners run normal underwriting; see the setup guide for the document checklist.",
   },
 ];
 

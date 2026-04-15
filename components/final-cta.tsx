@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { motion } from "motion/react";
 import * as THREE from "three";
@@ -232,7 +233,7 @@ export function FinalCTA(): ReactNode {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2, ease }}
-          className="mt-10"
+          className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
         >
           <a
             href="/signup"
@@ -240,6 +241,12 @@ export function FinalCTA(): ReactNode {
           >
             Get started free
           </a>
+          <Link
+            href="/book-demo"
+            className="inline-flex items-center rounded-full border border-border px-8 py-4 text-sm font-medium text-foreground transition-all duration-150 hover:bg-muted active:scale-[0.97]"
+          >
+            Book a demo
+          </Link>
         </motion.div>
       </div>
     </section>

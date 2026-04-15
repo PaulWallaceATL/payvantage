@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 export const metadata: Metadata = createMetadata({
   title: "Pricing",
   description:
-    "Simple, transparent pricing for PayVantage. 2.9% + $0.30 per transaction. No monthly fees, no setup costs, no rolling reserves.",
+    "PayVantage pricing: 6% flat for typical high-risk supplement categories, or lower than 6% for standard merchants based on industry and volume. No monthly fees or setup costs.",
   path: "/pricing",
 });
 

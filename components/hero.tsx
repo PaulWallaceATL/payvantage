@@ -299,7 +299,7 @@ export function Hero(): ReactNode {
                 Start Accepting Payments
               </a>
               <a
-                href="#"
+                href="/book-demo"
                 className="cursor-pointer h-12 px-8 text-sm font-medium bg-transparent border border-white/20 text-white rounded-full hover:bg-white/10 active:scale-[0.97] transition-all duration-150 flex items-center justify-center gap-2 whitespace-nowrap"
               >
                 Book a Demo

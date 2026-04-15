@@ -26,23 +26,24 @@ const navLinks: NavItem[] = [
     items: [
       {
         label: "Payment Gateway",
-        description: "Accept card payments settled in stablecoins",
-        href: "#",
-      },
-      {
-        label: "Instant Settlement",
-        description: "Receive USDC/USDT within minutes",
-        href: "#",
+        description:
+          "Visa, Mastercard, Apple Pay, and Google Pay through PayVantage",
+        href: "/products/payment-gateway",
       },
       {
         label: "Chargeback Shield",
-        description: "Irreversible crypto payments, zero disputes",
-        href: "#",
+        description: "USDC on Polygon—final settlement, no card chargebacks",
+        href: "/products/chargeback-shield",
+      },
+      {
+        label: "Instant Settlement",
+        description: "USDC to your Polygon wallet as each transaction completes",
+        href: "/products/instant-settlement",
       },
       {
         label: "API & SDKs",
-        description: "Developer-friendly integration tools",
-        href: "#",
+        description: "Setup, requirements, and integration guidance",
+        href: "/docs",
       },
     ],
   },
@@ -52,24 +53,74 @@ const navLinks: NavItem[] = [
   },
   {
     label: "Docs",
-    href: "#",
+    href: "/docs",
   },
   {
     label: "Company",
     hasDropdown: true,
     items: [
-      { label: "About us", description: "Our story and mission", href: "#" },
-      { label: "Blog", description: "Insights and guides", href: "#" },
       {
         label: "Security",
         description: "How we keep you safe",
-        href: "#",
+        href: "mailto:hello@payvantage.io?subject=Security",
       },
     ],
   },
 ];
 
 const ease = [0.23, 1, 0.32, 1] as const;
+
+function DropdownItem({
+  item,
+}: {
+  item: { label: string; description: string; href: string };
+}): ReactNode {
+  const className =
+    "block rounded-xl px-4 py-4 transition-colors hover:bg-muted";
+  const body = (
+    <>
+      <div className="text-sm font-medium text-foreground">{item.label}</div>
+      <div className="mt-0.5 text-xs text-muted-foreground">
+        {item.description}
+      </div>
+    </>
+  );
+  if (item.href.startsWith("/")) {
+    return (
+      <Link href={item.href} className={className}>
+        {body}
+      </Link>
+    );
+  }
+  return (
+    <a href={item.href} className={className}>
+      {body}
+    </a>
+  );
+}
+
+function MobileNavLeaf({
+  item,
+  onNavigate,
+}: {
+  item: { label: string; description: string; href: string };
+  onNavigate: () => void;
+}): ReactNode {
+  const className =
+    "block py-2 text-sm text-foreground/80 hover:text-foreground";
+  if (item.href.startsWith("/")) {
+    return (
+      <Link href={item.href} className={className} onClick={onNavigate}>
+        {item.label}
+      </Link>
+    );
+  }
+  return (
+    <a href={item.href} className={className} onClick={onNavigate}>
+      {item.label}
+    </a>
+  );
+}
 
 function HamburgerIcon({
   isOpen,
@@ -172,18 +223,7 @@ function DesktopDropdown({
                 >
                   <div className="min-w-56">
                     {items.map((item) => (
-                      <a
-                        key={item.label}
-                        href={item.href}
-                        className="block rounded-xl px-4 py-4 transition-colors hover:bg-muted"
-                      >
-                        <div className="text-sm font-medium text-foreground">
-                          {item.label}
-                        </div>
-                        <div className="mt-0.5 text-xs text-muted-foreground">
-                          {item.description}
-                        </div>
-                      </a>
+                      <DropdownItem key={item.label} item={item} />
                     ))}
                   </div>
                 </motion.div>
@@ -238,14 +278,11 @@ function MobileExpandable({
           >
             <div className="space-y-1 pb-2">
               {items.map((item) => (
-                <a
+                <MobileNavLeaf
                   key={item.label}
-                  href={item.href}
-                  className="block py-2 text-sm text-foreground/80 hover:text-foreground"
-                  onClick={onClose}
-                >
-                  {item.label}
-                </a>
+                  item={item}
+                  onNavigate={onClose}
+                />
               ))}
             </div>
           </motion.div>

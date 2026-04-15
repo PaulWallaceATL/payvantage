@@ -1,7 +1,6 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { Star } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { LogoLoop, type LogoItem } from "@/components/logo-loop";
@@ -103,35 +102,21 @@ export function TrustedBy(): ReactNode {
   return (
     <section className="relative w-full bg-background py-16 sm:py-20">
       <div className="flex flex-col items-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, ease }}
-          className="flex items-center gap-0.5 mb-4"
-        >
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              className="w-3.5 h-3.5 fill-accent text-accent"
-              aria-hidden="true"
-            />
-          ))}
-        </motion.div>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1, ease }}
-          className="text-lg sm:text-xl font-serif italic text-foreground/80 mb-10"
+          transition={{ duration: 0.5, ease }}
+          className="mx-auto mb-10 max-w-xl px-4 text-center text-lg font-serif italic leading-snug text-foreground/85 sm:text-xl"
         >
-          Trusted by over 500+ companies
+          Built for high-risk merchants who have been turned away everywhere
+          else
         </motion.p>
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2, ease }}
+          transition={{ duration: 0.6, delay: 0.1, ease }}
           className="w-full"
         >
           <LogoLoop logos={logos} speed={50} logoHeight={36} gap={80} />

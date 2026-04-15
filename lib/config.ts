@@ -38,13 +38,13 @@ export const heroConfig = {
     },
     secondary: {
       text: "Book a Demo",
-      href: "#",
+      href: "/book-demo",
     },
   },
 } as const;
 
 export const trustedByConfig = {
-  title: "Trusted by high-risk merchants worldwide",
+  title: "Built for merchants other processors turn away",
 } as const;
 
 export const featureCardsConfig = {
@@ -69,22 +69,9 @@ export const principlesConfig = {
   title: "Built on principles that matter",
 } as const;
 
-export const statsConfig = {
-  stats: [
-    { value: 1.2, suffix: "B+", prefix: "$", label: "Settled in stablecoins" },
-    { value: 99.9, suffix: "%", label: "Uptime guarantee" },
-    { value: 85, suffix: "+", label: "Countries supported" },
-    { value: 12, suffix: "K+", label: "Active merchants" },
-  ],
-} as const;
-
-export const testimonialsConfig = {
-  title: "Trusted by Merchants Everywhere",
-} as const;
-
 export const pricingConfig = {
   title: "Simple, transparent pricing",
-  trustBadge: "Trusted by 12,000+ merchants",
+  trustBadge: "Rates discussed honestly on a short call",
 } as const;
 
 export const faqConfig = {
@@ -103,15 +90,15 @@ export const blogConfig = {
   description:
     "Insights on high-risk payments, stablecoin settlement, and merchant growth strategies.",
   cta: {
-    text: "View all articles",
-    href: "#",
+    text: "Setup & docs",
+    href: "/docs",
   },
 } as const;
 
 export const finalCtaConfig = {
   headline: "Ready to accept payments without limits?",
   description:
-    "Join thousands of merchants already using PayVantage for instant, chargeback-free stablecoin settlement.",
+    "See whether card-to-crypto settlement or a traditional processing path fits your business—we will be direct about what we can do today.",
   cta: {
     text: "Get Started Free",
     href: "/signup",
@@ -127,16 +114,15 @@ export const footerConfig = {
   },
   links: {
     product: [
-      { label: "Merchants", href: "#" },
-      { label: "Enterprise", href: "#" },
-      { label: "Integrations", href: "#" },
-      { label: "API Docs", href: "#" },
+      { label: "Payment gateway", href: "/products/payment-gateway" },
+      { label: "Chargeback shield", href: "/products/chargeback-shield" },
+      { label: "Instant settlement", href: "/products/instant-settlement" },
+      { label: "Setup & docs", href: "/docs" },
     ],
     company: [
-      { label: "About", href: "#" },
-      { label: "Blog", href: "#" },
-      { label: "Careers", href: "#" },
-      { label: "Contact", href: "#" },
+      { label: "Book a demo", href: "/book-demo" },
+      { label: "Careers", href: "mailto:hello@payvantage.io?subject=Careers" },
+      { label: "Contact", href: "mailto:hello@payvantage.io" },
     ],
     legal: [
       { label: "Privacy", href: "#" },
@@ -162,8 +148,8 @@ export const features = {
   smoothScroll: true,
   darkMode: true,
   statsSection: true,
-  blogSection: true,
-  testimonialsSection: true,
+  blogSection: false,
+  testimonialsSection: false,
 } as const;
 
 /**

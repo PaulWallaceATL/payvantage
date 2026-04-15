@@ -18,29 +18,39 @@ const featuresList: FeatureCard[] = [
     title: "No Underwriting. Start in minutes.",
     description:
       "Skip the weeks of paperwork and bank approvals. Connect your wallet, configure your checkout, and start accepting payments immediately.",
-    href: "#",
+    href: "/products/payment-gateway",
     visual: "comparison",
   },
   {
     title: "Instant stablecoin settlement.",
     description:
-      "Every card payment is converted to USDC or USDT and settled to your wallet within minutes. No 30-day holds, no rolling reserves.",
-    href: "#",
+      "Each cleared sale can settle as USDC to your Polygon wallet. No multi-day batch delays in the traditional sense.",
+    href: "/products/instant-settlement",
     visual: "chart",
   },
   {
     title: "Plug in with one API call.",
     description:
       "Integrate PayVantage into WooCommerce, Shopify, or any custom checkout with our REST API. Full SDKs and plugins included.",
-    href: "#",
+    href: "/docs",
     visual: "code",
   },
 ];
 
 function ComparisonVisual(): ReactNode {
   const rows = [
-    { name: "PayVantage", speed: "Minutes", fees: "2.9%", highlight: true },
-    { name: "Traditional", speed: "30+ days", fees: "4-8%", highlight: false },
+    {
+      name: "PayVantage",
+      speed: "Minutes",
+      fees: "From 6%",
+      highlight: true,
+    },
+    {
+      name: "Traditional",
+      speed: "30+ days",
+      fees: "4-8%",
+      highlight: false,
+    },
     { name: "Wire", speed: "3-5 days", fees: "$25-50", highlight: false },
   ];
 
@@ -95,9 +105,9 @@ function ChartVisual(): ReactNode {
     <div className="flex h-full w-full items-center justify-center p-8 sm:p-6">
       <div className="relative w-full max-w-xs">
         <div className="mb-3">
-          <div className="text-xs text-muted-foreground">Avg. Settlement</div>
+          <div className="text-xs text-muted-foreground">Settlement</div>
           <div className="text-xl font-semibold text-accent sm:text-2xl">
-            &lt; 5 min
+            Per txn
           </div>
         </div>
         <div className="flex h-24 items-end justify-between gap-2 sm:h-32">

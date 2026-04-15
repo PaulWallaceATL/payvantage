@@ -7,28 +7,27 @@ const footerLinks = {
   product: {
     title: "Product",
     links: [
-      { label: "Merchants", href: "#" },
-      { label: "Enterprise", href: "#" },
+      { label: "Payment gateway", href: "/products/payment-gateway" },
+      { label: "Chargeback shield", href: "/products/chargeback-shield" },
+      { label: "Instant settlement", href: "/products/instant-settlement" },
       { label: "Integrations", href: "/dashboard/integrations" },
-      { label: "API Docs", href: "#" },
     ],
   },
   company: {
     title: "Company",
     links: [
-      { label: "About us", href: "#" },
-      { label: "Blog", href: "#" },
-      { label: "Security", href: "#" },
-      { label: "Contact", href: "#" },
+      { label: "Book a demo", href: "/book-demo" },
+      { label: "Security", href: "mailto:hello@payvantage.io?subject=Security" },
+      { label: "Contact", href: "mailto:hello@payvantage.io" },
     ],
   },
   resources: {
     title: "Resources",
     links: [
-      { label: "Help Center", href: "#" },
-      { label: "Developer API", href: "#" },
-      { label: "WooCommerce Plugin", href: "#" },
-      { label: "Shopify App", href: "#" },
+      { label: "Setup & docs", href: "/docs" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Sign up", href: "/signup" },
+      { label: "Log in", href: "/login" },
     ],
   },
 };

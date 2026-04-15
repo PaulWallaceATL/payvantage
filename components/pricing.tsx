@@ -20,43 +20,29 @@ type PricingPlan = {
 
 const plans: PricingPlan[] = [
   {
-    name: "Standard",
-    tagline: "For merchants of all sizes",
-    price: "2.9% + $0.30",
-    priceDetail: "per transaction",
+    name: "High-risk merchants",
+    tagline: "Peptides, supplements, nutraceuticals",
+    price: "6%",
+    priceDetail: "per transaction — flat percentage only",
     description:
-      "No monthly fees. No setup costs. No rolling reserves. Accept card payments settled in stablecoins with instant payouts to your wallet.",
-    cta: "Get Started",
-    ctaHref: "/signup",
+      "No monthly fees. No setup costs. No per-transaction dollar add-on: just the flat percentage. Designed for categories that struggle to get fair treatment elsewhere.",
+    cta: "Book a demo",
+    ctaHref: "/book-demo",
     featured: true,
-    preferredBy: ["E-commerce", "SaaS", "Digital Goods"],
+    preferredBy: ["Supplements", "Peptides", "Nutraceuticals"],
   },
   {
-    name: "Enterprise",
-    tagline: "Custom solutions at scale",
-    price: "Custom",
+    name: "Standard / lower-risk",
+    tagline: "Rate tailored to your business",
+    price: "Lower than 6%",
+    priceDetail: "exact rate on a call (industry & volume)",
     description:
-      "Volume-based pricing, dedicated account manager, custom integrations, SLA guarantees, and priority support for high-volume merchants.",
-    cta: "Contact Sales",
-    ctaHref: "#",
-    preferredBy: ["Marketplaces", "Platforms", "High-Volume"],
+      "No monthly fees and no setup costs. We align pricing with your industry and processing volume after a short conversation—no hidden minimums or equipment fees on this page.",
+    cta: "Book a demo",
+    ctaHref: "/book-demo",
+    preferredBy: ["E-commerce", "SaaS", "Established brands"],
   },
 ];
-
-function AvatarStack(): ReactNode {
-  return (
-    <div className="-space-x-2 flex items-center">
-      {[...Array(5)].map((_, i) => (
-        <div
-          key={i}
-          className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border-2 border-background bg-background"
-        >
-          <div className="h-full w-full bg-linear-to-br from-foreground/20 to-foreground/5" />
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function PricingCard({
   plan,
@@ -109,8 +95,8 @@ function PricingCard({
         </a>
       </div>
       <div className="border-t border-border pt-6">
-        <p className="mb-2 text-xs text-muted-foreground">Popular with:</p>
-        <div className="flex items-center gap-4">
+        <p className="mb-2 text-xs text-muted-foreground">Common fits:</p>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           {plan.preferredBy.map((segment) => (
             <span
               key={segment}
@@ -130,29 +116,26 @@ export function Pricing(): ReactNode {
     <section className="relative w-full bg-background py-24 sm:py-32">
       <div className="mx-auto max-w-4xl px-6 sm:px-8">
         <div className="mb-16 flex flex-col items-center text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, ease }}
-            className="mb-6 flex items-center gap-3"
-          >
-            <AvatarStack />
-            <span className="text-sm text-muted-foreground">
-              Trusted by{" "}
-              <span className="font-medium text-foreground">12,000+</span>{" "}
-              merchants
-            </span>
-          </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1, ease }}
+            transition={{ duration: 0.6, delay: 0.05, ease }}
             className="font-serif text-3xl font-medium leading-tight text-foreground sm:text-4xl lg:text-5xl"
           >
             Simple, transparent pricing
           </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.12, ease }}
+            className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base"
+          >
+            Two clear tracks—no monthly minimums, equipment fees, or setup
+            charges called out here. If you are unsure which applies, book a
+            short call and we will point you in the right direction.
+          </motion.p>
         </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {plans.map((plan, index) => (
