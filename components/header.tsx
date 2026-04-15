@@ -177,11 +177,12 @@ function DesktopDropdown({
             role="presentation"
           >
             <motion.div
-              initial={{ opacity: 0, y: 8, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.96 }}
+              initial={{ y: 8, scale: 0.98 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 8, scale: 0.98 }}
               transition={{ duration: 0.2, ease }}
-              className="isolate mix-blend-normal overflow-hidden rounded-2xl border border-neutral-700 bg-[#070712] p-1.5 shadow-2xl"
+              style={{ backgroundColor: "#0a0a12" }}
+              className="overflow-hidden rounded-2xl border border-neutral-600 p-1.5 shadow-2xl"
             >
               <div className="flex flex-col gap-1">
                 {items.map((item) => (
@@ -299,7 +300,7 @@ export function Header(): ReactNode {
         aria-hidden="true"
       />
 
-      <header className="fixed top-0 right-0 left-0 z-[10020] hidden mix-blend-exclusion lg:block">
+      <header className="fixed top-0 right-0 left-0 z-[10020] hidden lg:block">
         <div className="mx-auto flex h-20 w-full items-center justify-between px-6 sm:px-8">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -372,7 +373,7 @@ export function Header(): ReactNode {
         </div>
       </header>
 
-      <header className="fixed top-0 right-0 left-0 z-[10020] mix-blend-exclusion lg:hidden">
+      <header className="fixed top-0 right-0 left-0 z-[10020] lg:hidden">
         <div className="mx-auto flex h-16 w-full items-center justify-between px-6 sm:px-8">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
