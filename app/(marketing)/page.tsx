@@ -1,5 +1,6 @@
 import { FAQ } from "@/components/faq";
 import { FeatureCards } from "@/components/feature-cards";
+import { HomePreloader } from "@/components/home-preloader";
 import { FeatureHighlight } from "@/components/feature-highlight";
 import { FinalCTA } from "@/components/final-cta";
 import { Hero } from "@/components/hero";
@@ -20,6 +21,7 @@ export const metadata: Metadata = createMetadata({
 export default function HomePage(): ReactNode {
   return (
     <main id="main-content" className="flex-1">
+      <HomePreloader />
       <Hero />
       <TrustedBy />
       <FeatureCards />

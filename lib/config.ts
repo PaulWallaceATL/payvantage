@@ -117,12 +117,18 @@ export const footerConfig = {
       { label: "Payment gateway", href: "/products/payment-gateway" },
       { label: "Chargeback shield", href: "/products/chargeback-shield" },
       { label: "Instant settlement", href: "/products/instant-settlement" },
-      { label: "Setup & docs", href: "/docs" },
+      { label: "Integrations", href: "/dashboard/integrations" },
     ],
-    company: [
+    resources: [
+      { label: "Setup & docs", href: "/docs" },
+      { label: "Pricing", href: "/pricing" },
       { label: "Book a demo", href: "/book-demo" },
-      { label: "Careers", href: "mailto:hello@payvantage.io?subject=Careers" },
+      { label: "Sign up", href: "/signup" },
+      { label: "Log in", href: "/login" },
+    ],
+    support: [
       { label: "Contact", href: "mailto:hello@payvantage.io" },
+      { label: "Security", href: "mailto:hello@payvantage.io?subject=Security" },
     ],
     legal: [
       { label: "Privacy", href: "#" },

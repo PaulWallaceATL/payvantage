@@ -13,21 +13,21 @@ const footerLinks = {
       { label: "Integrations", href: "/dashboard/integrations" },
     ],
   },
-  company: {
-    title: "Company",
-    links: [
-      { label: "Book a demo", href: "/book-demo" },
-      { label: "Security", href: "mailto:hello@payvantage.io?subject=Security" },
-      { label: "Contact", href: "mailto:hello@payvantage.io" },
-    ],
-  },
   resources: {
     title: "Resources",
     links: [
       { label: "Setup & docs", href: "/docs" },
       { label: "Pricing", href: "/pricing" },
+      { label: "Book a demo", href: "/book-demo" },
       { label: "Sign up", href: "/signup" },
       { label: "Log in", href: "/login" },
+    ],
+  },
+  support: {
+    title: "Support",
+    links: [
+      { label: "Contact", href: "mailto:hello@payvantage.io" },
+      { label: "Security", href: "mailto:hello@payvantage.io?subject=Security" },
     ],
   },
 };
@@ -71,7 +71,7 @@ export function Footer(): ReactNode {
                   high-risk payment gateway powered by stablecoins.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:gap-16">
+              <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:gap-12">
                 {Object.values(footerLinks).map((section) => (
                   <div key={section.title}>
                     <h3 className="mb-5 text-xs font-medium uppercase tracking-wider text-foreground/40">

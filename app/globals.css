@@ -57,6 +57,19 @@ body {
   color: white;
 }
 
+@keyframes auth-marquee {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+.animate-auth-marquee {
+  animation: auth-marquee 48s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -64,6 +77,11 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .animate-auth-marquee {
+    animation: none !important;
+    transform: none !important;
   }
 }
 
@@ -74,6 +92,12 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom cursor (see components/custom-cursor.tsx) */
+html.pv-custom-cursor,
+html.pv-custom-cursor * {
+  cursor: none !important;
 }
 
 .skip-to-content {

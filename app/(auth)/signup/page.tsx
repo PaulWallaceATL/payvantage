@@ -1,13 +1,18 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type ReactNode, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
+
+const inputClass =
+  "h-12 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent";
 
 export default function SignupPage(): ReactNode {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,29 +44,36 @@ export default function SignupPage(): ReactNode {
   }
 
   return (
-    <>
-      <div className="mb-6 text-center">
-        <h1 className="text-2xl font-semibold text-foreground">
+    <div className="w-full max-w-md">
+      <div className="mb-8">
+        <div
+          className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-foreground text-xs font-bold text-background"
+          aria-hidden
+        >
+          PV
+        </div>
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
           Create your account
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Start accepting payments in minutes
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          Start onboarding for card-to-crypto settlement and high-risk
+          checkout—in minutes, not weeks.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-500">
+      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
+        {error ? (
+          <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
             {error}
           </div>
-        )}
+        ) : null}
 
         <div>
           <label
             htmlFor="company"
-            className="mb-1.5 block text-sm font-medium text-foreground"
+            className="mb-2 block text-sm font-medium text-foreground"
           >
-            Company name
+            Company / brand name
           </label>
           <input
             id="company"
@@ -69,17 +81,18 @@ export default function SignupPage(): ReactNode {
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
             required
-            placeholder="Acme Inc."
-            className="h-11 w-full rounded-lg border border-border bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+            autoComplete="organization"
+            placeholder="Acme Supplements LLC"
+            className={inputClass}
           />
         </div>
 
         <div>
           <label
             htmlFor="email"
-            className="mb-1.5 block text-sm font-medium text-foreground"
+            className="mb-2 block text-sm font-medium text-foreground"
           >
-            Email
+            Email address
           </label>
           <input
             id="email"
@@ -87,51 +100,64 @@ export default function SignupPage(): ReactNode {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            placeholder="you@example.com"
-            className="h-11 w-full rounded-lg border border-border bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+            autoComplete="email"
+            placeholder="name@company.com"
+            className={inputClass}
           />
         </div>
 
         <div>
           <label
             htmlFor="password"
-            className="mb-1.5 block text-sm font-medium text-foreground"
+            className="mb-2 block text-sm font-medium text-foreground"
           >
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-            placeholder="••••••••"
-            className="h-11 w-full rounded-lg border border-border bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
-          />
-          <p className="mt-1 text-xs text-muted-foreground">
-            Must be at least 8 characters
-          </p>
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+              placeholder="At least 8 characters"
+              className={`${inputClass} pr-12`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="h-11 w-full rounded-lg bg-foreground text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
+          className="h-12 w-full rounded-full bg-foreground text-sm font-semibold text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
         >
-          {loading ? "Creating account..." : "Create account"}
+          {loading ? "Creating account…" : "Create account"}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-muted-foreground">
+      <p className="mt-8 text-sm text-muted-foreground">
         Already have an account?{" "}
         <Link
           href="/login"
-          className="font-medium text-foreground hover:underline"
+          className="font-semibold text-foreground underline-offset-4 hover:underline"
         >
           Sign in
         </Link>
       </p>
-    </>
+    </div>
   );
 }

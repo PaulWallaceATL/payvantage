@@ -100,28 +100,13 @@ export function ProductHero({
           </div>
         </div>
 
-        <div className="relative mx-auto flex w-full max-w-lg flex-col items-stretch lg:mx-0 lg:max-w-none">
-          <div className="flex min-h-[min(360px,70vw)] w-full items-center justify-center rounded-[1.75rem] bg-muted/30 px-4 py-10 ring-1 ring-border sm:rounded-[2rem] sm:px-8 sm:py-12">
-            <CreditCard
-              rotationIntensity={1}
-              parallaxIntensity={1}
-              borderRadius={18}
-              {...creditCard}
-            />
-          </div>
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            Interactive preview — move your pointer to tilt; click to flip and
-            see CVV (based on{" "}
-            <a
-              href="https://pro.reactbits.dev/docs/components/credit-card"
-              className="underline-offset-2 hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              React Bits Pro
-            </a>
-            ).
-          </p>
+        <div className="relative mx-auto flex w-full max-w-lg items-center justify-center lg:mx-0 lg:max-w-none">
+          <CreditCard
+            rotationIntensity={1}
+            parallaxIntensity={1}
+            borderRadius={18}
+            {...creditCard}
+          />
         </div>
       </div>
     </section>

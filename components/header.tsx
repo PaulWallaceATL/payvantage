@@ -55,17 +55,6 @@ const navLinks: NavItem[] = [
     label: "Docs",
     href: "/docs",
   },
-  {
-    label: "Company",
-    hasDropdown: true,
-    items: [
-      {
-        label: "Security",
-        description: "How we keep you safe",
-        href: "mailto:hello@payvantage.io?subject=Security",
-      },
-    ],
-  },
 ];
 
 const ease = [0.23, 1, 0.32, 1] as const;
