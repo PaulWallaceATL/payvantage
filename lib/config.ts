@@ -6,9 +6,9 @@
 
 export const siteConfig = {
   name: "PayVantage",
-  tagline: "The High-Risk Payment Gateway Powered by Stablecoins",
+  tagline: "High-risk payments — two rails, one platform",
   description:
-    "Accept payments without underwriting delays, chargebacks, or rolling reserves. PayVantage uses card-to-crypto onramping and stablecoin settlement for instant, irreversible payments.",
+    "Traditional card processing through our banking network, plus instant USDC settlement for merchants who need liquidity without chargebacks. Built for categories mainstream processors avoid.",
   url: "https://payvantage.io",
   twitter: "@payvantage",
 
@@ -30,7 +30,7 @@ export const heroConfig = {
     line2: "just work",
   },
   description:
-    "The high-risk payment gateway powered by stablecoins. No underwriting, instant settlement, zero chargebacks.",
+    "High-risk payment processing with traditional acquiring and optional instant USDC settlement — pick the rail that fits your business.",
   cta: {
     primary: {
       text: "Start Accepting Payments",
@@ -48,8 +48,8 @@ export const trustedByConfig = {
 } as const;
 
 export const featureCardsConfig = {
-  title: "The new standard",
-  subtitle: "for high-risk payments",
+  title: "Two rails. One platform.",
+  subtitle: "We match your business with the right processing solution",
 } as const;
 
 export const featureHighlightConfig = {
@@ -98,7 +98,7 @@ export const blogConfig = {
 export const finalCtaConfig = {
   headline: "Ready to accept payments without limits?",
   description:
-    "See whether card-to-crypto settlement or a traditional processing path fits your business—we will be direct about what we can do today.",
+    "See whether traditional acquiring or instant USDC settlement fits your business — we will be direct about what we can do today.",
   cta: {
     text: "Get Started Free",
     href: "/signup",
@@ -107,7 +107,7 @@ export const finalCtaConfig = {
 
 export const footerConfig = {
   description:
-    "The high-risk payment gateway built on stablecoins. Instant settlement, zero chargebacks, and no rolling reserves.",
+    "High-risk payment processing with traditional settlement and USDC options — transparent pricing and support that understands your vertical.",
   cta: {
     text: "Start Accepting Payments",
     href: "/signup",

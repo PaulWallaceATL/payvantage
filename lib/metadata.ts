@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const siteConfig = {
   name: "PayVantage",
   description:
-    "The high-risk payment gateway powered by stablecoins. Accept payments without underwriting, chargebacks, or rolling reserves.",
+    "High-risk payment processing with two rails: traditional card acquiring and instant USDC settlement. Built for merchants mainstream processors won't serve.",
   url: "https://payvantage.io",
   ogImage: "/og-image.png",
   creator: "@payvantage",
@@ -17,11 +17,10 @@ export const siteConfig = {
     "high-risk payments",
     "payment gateway",
     "stablecoin settlement",
-    "crypto onramp",
-    "chargeback-free",
+    "USDC settlement",
     "merchant services",
-    "PayRam",
-    "card-to-crypto",
+    "traditional card processing",
+    "supplements payments",
   ],
 } as const;
 

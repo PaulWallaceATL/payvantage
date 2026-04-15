@@ -12,6 +12,7 @@ type PricingPlan = {
   tagline: string;
   price: string;
   priceDetail?: string;
+  priceSubline?: string;
   description: string;
   cta: string;
   ctaHref: string;
@@ -25,6 +26,7 @@ const plans: PricingPlan[] = [
     tagline: "Peptides, supplements, nutraceuticals",
     price: "6%",
     priceDetail: "per transaction — flat percentage only",
+    priceSubline: "Instant USDC settlement",
     description:
       "No monthly fees. No setup costs. No per-transaction dollar add-on: just the flat percentage. Designed for categories that struggle to get fair treatment elsewhere.",
     cta: "Book a demo",
@@ -33,15 +35,15 @@ const plans: PricingPlan[] = [
     preferredBy: ["Supplements", "Peptides", "Nutraceuticals"],
   },
   {
-    name: "Standard / lower-risk",
+    name: "Traditional Card Processing",
     tagline: "Rate tailored to your business",
-    price: "Lower than 6%",
-    priceDetail: "exact rate on a call (industry & volume)",
+    price: "Custom",
+    priceDetail: "— based on volume and industry",
     description:
       "No monthly fees and no setup costs. We align pricing with your industry and processing volume after a short conversation—no hidden minimums or equipment fees on this page.",
     cta: "Book a demo",
     ctaHref: "/book-demo",
-    preferredBy: ["E-commerce", "SaaS", "Established brands"],
+    preferredBy: ["Supplements", "Peptides", "Nutraceuticals"],
   },
 ];
 
@@ -82,6 +84,11 @@ function PricingCard({
           {plan.priceDetail && (
             <p className="mt-1 text-sm text-muted-foreground">
               {plan.priceDetail}
+            </p>
+          )}
+          {plan.priceSubline && (
+            <p className="mt-2 text-sm font-medium text-accent">
+              {plan.priceSubline}
             </p>
           )}
         </div>

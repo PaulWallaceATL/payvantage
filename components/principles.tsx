@@ -3,7 +3,8 @@
 import { type ReactNode } from "react";
 import {
   Sparkles,
-  ShieldCheck,
+  Layers,
+  Zap,
   Plug,
   BarChart3,
   ArrowRight,
@@ -14,25 +15,30 @@ const ease = [0.16, 1, 0.3, 1] as const;
 
 type PrincipleCard = {
   icon: ReactNode;
-  label: string;
+  title: string;
+  body: string;
 };
 
 const principles: PrincipleCard[] = [
   {
-    icon: <ShieldCheck className="h-12 w-12" strokeWidth={1} />,
-    label: "Chargeback Immunity",
+    icon: <Layers className="h-10 w-10" strokeWidth={1} />,
+    title: "Multiple Processing Options",
+    body: "Traditional card processing or USDC settlement. We match you with the right solution.",
   },
   {
-    icon: <Sparkles className="h-12 w-12" strokeWidth={1} />,
-    label: "No Underwriting",
+    icon: <Zap className="h-10 w-10" strokeWidth={1} />,
+    title: "Fast Approvals",
+    body: "Traditional accounts approved in 48–72 hours. USDC accounts go live same day.",
   },
   {
-    icon: <Plug className="h-12 w-12" strokeWidth={1} />,
-    label: "WooCommerce & Shopify",
+    icon: <Plug className="h-10 w-10" strokeWidth={1} />,
+    title: "WooCommerce & Shopify",
+    body: "WooCommerce is live today. Shopify is on the roadmap — same simple setup philosophy.",
   },
   {
-    icon: <BarChart3 className="h-12 w-12" strokeWidth={1} />,
-    label: "Real-time Dashboard",
+    icon: <BarChart3 className="h-10 w-10" strokeWidth={1} />,
+    title: "Real-time Dashboard",
+    body: "Track volume, settlements, and transaction health from one place.",
   },
 ];
 
@@ -40,7 +46,7 @@ export function Principles(): ReactNode {
   return (
     <section className="relative w-full bg-muted py-24 text-foreground sm:py-32">
       <div className="mx-auto max-w-6xl px-6 sm:px-8">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-16">
           <div className="flex flex-col">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -72,9 +78,10 @@ export function Principles(): ReactNode {
               className="mt-6 max-w-lg leading-relaxed text-foreground/70"
             >
               Traditional processors reject high-risk merchants or bury them in
-              fees and reserves. PayVantage uses stablecoin settlement to
-              eliminate chargebacks, remove underwriting, and deliver instant
-              payouts.
+              fees and reserves. PayVantage gives you options — traditional card
+              processing through our banking network, or instant USDC settlement
+              with zero chargebacks. Either way, you get a dedicated partner who
+              understands your industry.
             </motion.p>
 
             <motion.a
@@ -90,21 +97,22 @@ export function Principles(): ReactNode {
             </motion.a>
           </div>
 
-          <div className="grid max-w-md grid-cols-2 gap-2 lg:ml-auto">
+          <div className="grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-2 lg:ml-auto lg:max-w-none">
             {principles.map((principle, index) => (
               <motion.div
-                key={principle.label}
+                key={principle.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.1 * index, ease }}
-                className="flex aspect-square flex-col items-center justify-center rounded-sm bg-foreground/5"
+                className="flex min-h-[200px] flex-col rounded-sm border border-border/60 bg-background/60 p-6"
               >
-                <div className="mb-4 text-foreground/80">
-                  {principle.icon}
-                </div>
-                <p className="px-4 text-center text-sm text-foreground/80">
-                  {principle.label}
+                <div className="mb-4 text-foreground/80">{principle.icon}</div>
+                <p className="text-sm font-semibold text-foreground">
+                  {principle.title}
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-foreground/70">
+                  {principle.body}
                 </p>
               </motion.div>
             ))}

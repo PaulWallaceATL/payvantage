@@ -264,7 +264,9 @@ export function Hero(): ReactNode {
               transition={{ duration: 0.6, delay: 0.3, ease }}
               className="cursor-pointer flex items-center gap-2 pl-4 pr-3 py-1.5 bg-white rounded-full mb-6"
             >
-              <span className="text-xs font-medium text-black">Powered by PayRam &mdash; Card-to-Crypto Onramping</span>
+              <span className="text-xs font-medium text-black">
+                Traditional processing & USDC settlement
+              </span>
               <ChevronRight className="w-3 h-3 text-black/50" />
             </motion.div>
 
@@ -283,7 +285,9 @@ export function Hero(): ReactNode {
               transition={{ duration: 0.6, delay: 0.7, ease }}
               className="mt-5 text-lg text-white/70 text-left lg:text-center max-w-xl"
             >
-              Accept card payments settled in stablecoins. No underwriting delays, no chargebacks, no rolling reserves. Start selling in minutes.
+              Traditional high-risk card processing or instant USDC settlement to
+              your wallet — pick the rail that fits. Dedicated support for
+              categories banks avoid.
             </motion.p>
 
             <motion.div
@@ -313,7 +317,7 @@ export function Hero(): ReactNode {
               className="flex items-center gap-2 mt-6 text-sm text-white/60"
             >
               <Shield className="w-4 h-4" />
-              Stablecoin settlement. Irreversible payments. Zero fraud.
+              Two rails. One partner. Honest timelines.
             </motion.p>
           </div>
         </motion.div>

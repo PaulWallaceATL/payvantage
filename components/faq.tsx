@@ -15,27 +15,27 @@ const faqs: FAQItem[] = [
   {
     question: "What is PayVantage?",
     answer:
-      "PayVantage is a payment gateway designed for high-risk merchants. We use card-to-crypto onramping via the PayRam API to convert card payments into stablecoins (USDC/USDT), giving you instant settlement without chargebacks or rolling reserves.",
+      "PayVantage is a payment processing company built for high-risk merchants. We offer two solutions: traditional card processing through our banking network with approvals in 48–72 hours, and a USDC settlement option where card payments settle instantly to your Polygon wallet with zero chargebacks. We work with peptides, supplements, nutraceuticals, and other high-risk verticals that mainstream processors won't serve.",
   },
   {
-    question: "How does chargeback immunity work?",
+    question: "Do you offer chargeback protection?",
     answer:
-      "Once a cardholder completes a payment, their funds are converted to stablecoins on-chain. Blockchain transactions are irreversible, eliminating the traditional chargeback risk. Disputes are handled through our merchant support process, not bank reversals.",
+      "On our USDC settlement rail, chargebacks are eliminated entirely. Card payments are converted to stablecoins on-chain, and blockchain transactions are irreversible by design. On our traditional card processing rail, chargebacks function normally but we work with processors experienced in high-risk verticals to minimize disputes.",
   },
   {
     question: "What are the fees?",
     answer:
-      "High-risk categories such as peptides, supplements, and nutraceuticals are typically 6% per transaction with no monthly fee, no setup cost, and no separate per-transaction dollar add-on. Standard and lower-risk merchants are priced below 6% based on industry and volume—discussed on a quick call. There are no monthly minimums or equipment fees bundled into our published structure.",
+      "Our USDC settlement rail is 6% per transaction — flat, no monthly fees, no setup costs. For traditional card processing, rates are custom based on your industry and volume. No monthly minimums or equipment fees on either option. Book a call and we'll walk you through which option fits your business.",
   },
   {
     question: "How fast is settlement?",
     answer:
-      "On the card-to-crypto rail, USDC can be sent to your Polygon wallet as each transaction completes, without the multi-day settlement windows common in legacy high-risk processing.",
+      "On our USDC rail, funds settle to your Polygon wallet within minutes of each transaction — no batching, no waiting. On our traditional processing rail, settlement follows standard banking timelines, typically 1–2 business days to your bank account.",
   },
   {
     question: "Do I need underwriting approval?",
     answer:
-      "On the card-to-crypto rail there is no paperwork required upfront to get oriented—book a call and we will confirm fit. If you apply for traditional card processing instead, our processor partners run normal underwriting; see the setup guide for the document checklist.",
+      "For our USDC rail, no underwriting is needed — book a call, confirm fit, and you can be live the same day. For traditional card processing, our processor partners handle underwriting and approvals are typically completed in 48–72 hours. We'll help you gather the required documents to make it as fast as possible.",
   },
 ];
 

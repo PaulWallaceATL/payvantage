@@ -2,6 +2,8 @@
 
 import { type ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -15,23 +17,23 @@ type FeatureCard = {
 
 const featuresList: FeatureCard[] = [
   {
-    title: "No Underwriting. Start in minutes.",
+    title: "Traditional card processing",
     description:
-      "Skip the weeks of paperwork and bank approvals. Connect your wallet, configure your checkout, and start accepting payments immediately.",
-    href: "/products/payment-gateway",
+      "We place qualified merchants with our network of high-risk acquiring banks. Full Visa, Mastercard, Amex support with competitive rates and fast approvals.",
+    href: "/book-demo",
     visual: "comparison",
   },
   {
-    title: "Instant stablecoin settlement.",
+    title: "Instant USDC settlement",
     description:
-      "Each cleared sale can settle as USDC to your Polygon wallet. No multi-day batch delays in the traditional sense.",
+      "For merchants who can't get traditional approval, accept card payments and settle instantly in USDC to your Polygon wallet. No chargebacks, no rolling reserves, no waiting.",
     href: "/products/instant-settlement",
     visual: "chart",
   },
   {
-    title: "Plug in with one API call.",
+    title: "Simple integration",
     description:
-      "Integrate PayVantage into WooCommerce, Shopify, or any custom checkout with our REST API. Full SDKs and plugins included.",
+      "WooCommerce plugin installs in minutes. Shopify and custom API coming soon. One Merchant ID, no crypto knowledge required.",
     href: "/docs",
     visual: "code",
   },
@@ -41,17 +43,16 @@ function ComparisonVisual(): ReactNode {
   const rows = [
     {
       name: "PayVantage",
-      speed: "Minutes",
-      fees: "From 6%",
+      approval: "48–72 hours",
+      reserves: "Competitive terms",
       highlight: true,
     },
     {
-      name: "Traditional",
-      speed: "30+ days",
-      fees: "4-8%",
+      name: "Industry average",
+      approval: "30–60 days",
+      reserves: "Heavy reserves common",
       highlight: false,
     },
-    { name: "Wire", speed: "3-5 days", fees: "$25-50", highlight: false },
   ];
 
   return (
@@ -59,8 +60,8 @@ function ComparisonVisual(): ReactNode {
       <div className="w-full max-w-xs">
         <div className="grid grid-cols-3 border-b border-border pb-2 text-xs text-muted-foreground">
           <div />
-          <div className="text-center">Onboard</div>
-          <div className="text-center">Fees</div>
+          <div className="text-center">Approval time</div>
+          <div className="text-center">Reserves</div>
         </div>
         {rows.map((row, i) => (
           <motion.div
@@ -86,12 +87,12 @@ function ComparisonVisual(): ReactNode {
             <div
               className={`text-center ${row.highlight ? "text-accent" : ""}`}
             >
-              {row.speed}
+              {row.approval}
             </div>
             <div
-              className={`text-center ${row.highlight ? "text-accent" : ""}`}
+              className={`text-center text-xs sm:text-sm ${row.highlight ? "text-accent" : ""}`}
             >
-              {row.fees}
+              {row.reserves}
             </div>
           </motion.div>
         ))}
@@ -122,7 +123,7 @@ function ChartVisual(): ReactNode {
                 transition={{ duration: 0.5, delay: i * 0.05, ease }}
                 style={{ height: `${height * 100}%` }}
               />
-            )
+            ),
           )}
         </div>
         <div className="mt-3 flex items-center justify-end gap-1">
@@ -142,7 +143,7 @@ function CodeVisual(): ReactNode {
     { text: "{", style: "text-muted-foreground" },
     { text: '  "amount": 99.00,', style: "text-accent" },
     { text: '  "currency": "USD",', style: "text-accent" },
-    { text: '  "settle_to": "USDC",', style: "text-accent" },
+    { text: '  "merchant_id": "pv_live_...",', style: "text-accent" },
     { text: '  "webhook": "/hooks"', style: "text-accent" },
     { text: "}", style: "text-muted-foreground" },
     { text: "→ 200 checkout_url", style: "text-accent" },
@@ -177,34 +178,51 @@ function FeatureCardItem({
   card: FeatureCard;
   index: number;
 }): ReactNode {
+  const router = useRouter();
+  const headingId = `feature-card-${index}-title`;
+
+  function go(): void {
+    router.push(card.href);
+  }
+
   return (
-    <motion.a
-      href={card.href}
+    <motion.article
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.6, delay: index * 0.1, ease }}
-      className="group flex flex-col overflow-hidden rounded-sm border border-border bg-muted/50 transition-[border-color,box-shadow] hover:border-foreground/20 hover:shadow-lg"
+      className="group flex cursor-pointer flex-col overflow-hidden rounded-sm border border-border bg-muted/50 transition-[border-color,box-shadow] hover:border-foreground/20 hover:shadow-lg"
+      aria-labelledby={headingId}
+      onClick={go}
     >
       <div className="relative h-56 bg-background sm:h-64">
         {card.visual === "comparison" && <ComparisonVisual />}
         {card.visual === "chart" && <ChartVisual />}
         {card.visual === "code" && <CodeVisual />}
       </div>
-      <div className="flex flex-col p-6">
-        <h3 className="font-serif text-lg font-medium text-foreground">
+      <div className="flex flex-col p-6 pb-4">
+        <h3
+          id={headingId}
+          className="font-serif text-lg font-medium text-foreground"
+        >
           {card.title}
         </h3>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
           {card.description}
         </p>
-        <div className="mt-4 flex items-center gap-1 text-sm font-medium text-foreground/80 transition-colors group-hover:text-foreground">
+      </div>
+      <div className="px-6 pb-6">
+        <Link
+          href={card.href}
+          className="inline-flex w-fit items-center gap-1 rounded-full border border-transparent px-3 py-2 text-sm font-medium text-foreground/80 transition-colors hover:border-border hover:bg-muted/60 hover:text-foreground"
+          onClick={(e) => e.stopPropagation()}
+        >
           Learn more
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-        </div>
+        </Link>
       </div>
-    </motion.a>
+    </motion.article>
   );
 }
 
@@ -212,18 +230,25 @@ export function FeatureCards(): ReactNode {
   return (
     <section className="relative w-full bg-background py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6 sm:px-8">
-        <div className="mb-16 flex flex-col items-center text-center">
+        <div className="mb-16 flex max-w-3xl flex-col">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1, ease }}
-            className="font-serif text-3xl font-medium text-foreground sm:text-4xl md:text-5xl"
+            className="font-serif text-3xl font-medium leading-tight text-foreground sm:text-4xl md:text-5xl"
           >
-            The new standard
-            <br />
-            <span className="italic">for high-risk payments</span>
+            Two rails. One platform.
           </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.18, ease }}
+            className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg"
+          >
+            We match your business with the right processing solution
+          </motion.p>
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {featuresList.map((card, index) => (

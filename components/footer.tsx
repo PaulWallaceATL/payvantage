@@ -67,8 +67,9 @@ export function Footer(): ReactNode {
                   </span>
                 </Link>
                 <p className="mt-4 max-w-xs text-sm text-foreground/50">
-                  &copy; {new Date().getFullYear()} PayVantage Inc. The
-                  high-risk payment gateway powered by stablecoins.
+                  &copy; {new Date().getFullYear()} PayVantage Inc. High-risk
+                  processing: traditional acquiring and USDC settlement in one
+                  platform.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:gap-12">

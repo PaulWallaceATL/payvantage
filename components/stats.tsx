@@ -9,18 +9,18 @@ const ease = [0.16, 1, 0.3, 1] as const;
 const pillars: { icon: typeof Shield; title: string; body: string }[] = [
   {
     icon: Shield,
-    title: "Zero chargebacks on the crypto rail",
-    body: "Card-to-crypto settlement in USDC on Polygon is final by design—no card-network reversals.",
+    title: "High-risk expertise",
+    body: "Peptides, supplements, nutraceuticals, and more. We know your industry and we know how to get you approved.",
   },
   {
     icon: Wallet,
-    title: "Liquidity where you control it",
-    body: "Funds land in the wallet you specify so you can move, hold, or convert on your timeline.",
+    title: "Your funds, your way",
+    body: "Settle to your bank account through traditional processing, or to your crypto wallet via USDC. You choose.",
   },
   {
     icon: Zap,
-    title: "Settlement at the speed of the chain",
-    body: "Stop waiting on multi-day batches when each payment can settle as USDC when it clears.",
+    title: "Fast onboarding",
+    body: "Traditional accounts approved in 48–72 hours. USDC accounts go live the same day. No month-long waiting games.",
   },
   {
     icon: CircleCheck,
@@ -33,16 +33,27 @@ export function Stats(): ReactNode {
   return (
     <section className="relative w-full overflow-hidden bg-muted pb-20 pt-12 sm:pb-24 sm:pt-16">
       <div className="relative mx-auto max-w-7xl px-6 sm:px-8">
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.45, ease }}
-          className="mx-auto mb-12 max-w-2xl text-center font-serif text-xl font-medium leading-snug text-foreground sm:text-2xl"
-        >
-          Credibility through clarity: irreversible settlement, instant USDC to
-          your Polygon wallet, and messaging you can stand behind.
-        </motion.p>
+        <div className="mx-auto mb-14 max-w-3xl text-center">
+          <motion.h2
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45, ease }}
+            className="font-serif text-2xl font-medium leading-snug text-foreground sm:text-3xl md:text-4xl"
+          >
+            Why merchants trust PayVantage
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45, delay: 0.06, ease }}
+            className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base"
+          >
+            We specialize in industries other processors won&apos;t touch —
+            and we give you real options, not one-size-fits-all.
+          </motion.p>
+        </div>
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:gap-14">
           {pillars.map((pillar, index) => (
             <motion.div

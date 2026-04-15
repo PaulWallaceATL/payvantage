@@ -3,7 +3,9 @@
 import { useReducedMotion } from "@/lib/motion";
 import { motion, useMotionValue, useSpring } from "motion/react";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+
+const PRODUCT_HERO_NATIVE_CURSOR_SELECTOR = "[data-pv-native-cursor='true']";
 
 const MORPH_SELECTOR =
   "a, button, [role='button'], input[type='submit'], input[type='button'], input[type='reset']";
@@ -49,6 +51,8 @@ export function CustomCursor(): ReactNode {
   const [active, setActive] = useState(false);
   const [pos, setPos] = useState({ x: -200, y: -200 });
   const [morph, setMorph] = useState<MorphState | null>(null);
+  const [useNativeCursorZone, setUseNativeCursorZone] = useState(false);
+  const nativeZoneRef = useRef(false);
 
   const mx = useMotionValue(-200);
   const my = useMotionValue(-200);
@@ -68,7 +72,7 @@ export function CustomCursor(): ReactNode {
   }, []);
 
   const enabledBase =
-    pointerFine && !reduceMotion && !disabledRoute && active;
+    pointerFine && !reduceMotion && !disabledRoute && active && !useNativeCursorZone;
 
   useEffect(() => {
     if (!morph) return;
@@ -84,9 +88,11 @@ export function CustomCursor(): ReactNode {
   useEffect(() => {
     if (!pointerFine || reduceMotion || disabledRoute) {
       document.documentElement.classList.remove("pv-custom-cursor");
+      nativeZoneRef.current = false;
       queueMicrotask(() => {
         setActive(false);
         setMorph(null);
+        setUseNativeCursorZone(false);
         mx.set(-200);
         my.set(-200);
       });
@@ -94,17 +100,36 @@ export function CustomCursor(): ReactNode {
     }
 
     const move = (e: MouseEvent) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      const hit = document.elementFromPoint(x, y);
+      const inProductHeroCard = Boolean(
+        hit?.closest(PRODUCT_HERO_NATIVE_CURSOR_SELECTOR),
+      );
+
+      if (inProductHeroCard !== nativeZoneRef.current) {
+        nativeZoneRef.current = inProductHeroCard;
+        setUseNativeCursorZone(inProductHeroCard);
+      }
+
+      if (inProductHeroCard) {
+        document.documentElement.classList.remove("pv-custom-cursor");
+        setMorph(null);
+        setActive(true);
+        setPos({ x, y });
+        mx.set(x);
+        my.set(y);
+        return;
+      }
+
       if (!document.documentElement.classList.contains("pv-custom-cursor")) {
         document.documentElement.classList.add("pv-custom-cursor");
       }
       setActive(true);
-      const x = e.clientX;
-      const y = e.clientY;
       setPos({ x, y });
       mx.set(x);
       my.set(y);
 
-      const hit = document.elementFromPoint(x, y);
       const target = hit?.closest(MORPH_SELECTOR) as HTMLElement | null;
 
       if (target && document.contains(target)) {
@@ -122,6 +147,8 @@ export function CustomCursor(): ReactNode {
 
     const leave = () => {
       document.documentElement.classList.remove("pv-custom-cursor");
+      nativeZoneRef.current = false;
+      setUseNativeCursorZone(false);
       setActive(false);
       setMorph(null);
       mx.set(-200);

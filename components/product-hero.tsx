@@ -100,7 +100,10 @@ export function ProductHero({
           </div>
         </div>
 
-        <div className="relative mx-auto flex w-full max-w-lg items-center justify-center lg:mx-0 lg:max-w-none">
+        <div
+          className="pv-product-hero-native-cursor relative mx-auto flex w-full max-w-lg items-center justify-center lg:mx-0 lg:max-w-none"
+          data-pv-native-cursor="true"
+        >
           <CreditCard
             rotationIntensity={1}
             parallaxIntensity={1}

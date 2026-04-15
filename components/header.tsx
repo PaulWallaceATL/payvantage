@@ -25,20 +25,22 @@ const navLinks: NavItem[] = [
     hasDropdown: true,
     items: [
       {
-        label: "Payment Gateway",
+        label: "Traditional Processing",
         description:
-          "Visa, Mastercard, Apple Pay, and Google Pay through PayVantage",
-        href: "/products/payment-gateway",
+          "High-risk card processing with fast approvals and competitive rates",
+        href: "/book-demo",
       },
       {
-        label: "Chargeback Shield",
-        description: "USDC on Polygon—final settlement, no card chargebacks",
-        href: "/products/chargeback-shield",
-      },
-      {
-        label: "Instant Settlement",
-        description: "USDC to your Polygon wallet as each transaction completes",
+        label: "USDC Settlement",
+        description:
+          "Accept cards, settle instantly in USDC to your Polygon wallet. Zero chargebacks.",
         href: "/products/instant-settlement",
+      },
+      {
+        label: "WooCommerce Plugin",
+        description:
+          "Install our plugin, enter your Merchant ID, and start accepting payments in minutes",
+        href: "/docs",
       },
       {
         label: "API & SDKs",

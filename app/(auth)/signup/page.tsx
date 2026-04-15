@@ -56,8 +56,8 @@ export default function SignupPage(): ReactNode {
           Create your account
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          Start onboarding for card-to-crypto settlement and high-risk
-          checkout—in minutes, not weeks.
+          Tell us about your business and we&apos;ll match you with the right
+          processing solution.
         </p>
       </div>
 

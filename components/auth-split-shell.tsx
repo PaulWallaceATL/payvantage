@@ -3,74 +3,17 @@
 import Link from "next/link";
 import { type ReactNode } from "react";
 
-/** Fictional, on-brand copy for layout only — not real merchant endorsements. */
-const MARQUEE_ITEMS = [
-  {
-    quote:
-      "We needed card checkout without another 45-day reserve story. Card-to-crypto settlement finally matched how we actually run inventory.",
-    name: "Jordan M.",
-    title: "Nutraceutical brand",
-    initials: "JM",
-  },
-  {
-    quote:
-      "Polygon USDC hitting our wallet when a sale clears beats waiting on batch files. Our finance team stopped guessing when cash would land.",
-    name: "Samira K.",
-    title: "E-commerce lead",
-    initials: "SK",
-  },
-  {
-    quote:
-      "High-risk categories get ghosted by processors. PayVantage framed the rail honestly—no fake volume stats, just what the product does today.",
-    name: "Alex R.",
-    title: "Supplements operator",
-    initials: "AR",
-  },
-  {
-    quote:
-      "Chargebacks were eating margin on our legacy stack. Final on-chain settlement is a different conversation with our customers and our bank.",
-    name: "Chris T.",
-    title: "Peptides retail",
-    initials: "CT",
-  },
-  {
-    quote:
-      "Payment links for campaigns plus a path to real integration mattered. One team, clear docs, and a calendly-style onboarding flow worked for us.",
-    name: "Priya N.",
-    title: "Growth marketer",
-    initials: "PN",
-  },
+const WHY_BULLETS = [
+  "High-risk specialists — peptides, supplements, nutraceuticals",
+  "Traditional processing or instant USDC settlement",
+  "Approvals in 48–72 hours, not weeks",
+  "No monthly minimums, no setup fees",
+  "Dedicated support from people who know your industry",
 ];
 
-function MarqueeCard({
-  item,
-}: {
-  item: (typeof MARQUEE_ITEMS)[number];
-}): ReactNode {
+function WhyMerchantsPanel(): ReactNode {
   return (
-    <article className="shrink-0 rounded-2xl border border-border/70 bg-background/90 p-5 shadow-sm backdrop-blur-sm dark:bg-background/70">
-      <p className="text-sm leading-relaxed text-foreground/90">&ldquo;{item.quote}&rdquo;</p>
-      <div className="mt-4 flex items-center gap-3">
-        <div
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground"
-          aria-hidden
-        >
-          {item.initials}
-        </div>
-        <div>
-          <p className="text-sm font-medium text-foreground">{item.name}</p>
-          <p className="text-xs text-muted-foreground">{item.title}</p>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function AuthMarqueePanel(): ReactNode {
-  const loop = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
-
-  return (
-    <div className="relative hidden min-h-0 overflow-hidden bg-muted/25 lg:flex lg:flex-col dark:bg-muted/10">
+    <div className="relative hidden min-h-0 flex-col justify-center bg-muted/25 lg:flex dark:bg-muted/10">
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.35] dark:opacity-25"
         style={{
@@ -80,29 +23,21 @@ function AuthMarqueePanel(): ReactNode {
         }}
         aria-hidden
       />
-      <div className="relative flex flex-1 flex-col justify-center overflow-hidden py-10">
-        <p className="mb-6 px-8 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Why teams explore PayVantage
-        </p>
-        <div className="relative h-[min(640px,calc(100vh-8rem))] overflow-hidden">
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 z-10 h-14 bg-linear-to-b from-background to-transparent"
-            aria-hidden
-          />
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-20 bg-linear-to-t from-background to-transparent"
-            aria-hidden
-          />
-          <div className="animate-auth-marquee flex flex-col gap-4 px-8">
-            {loop.map((item, i) => (
-              <MarqueeCard key={`${item.name}-${i}`} item={item} />
-            ))}
-          </div>
-        </div>
-        <p className="mt-6 px-8 text-center text-[11px] leading-snug text-muted-foreground">
-          Illustrative scenarios for product context only — not verified
-          customer testimonials.
-        </p>
+      <div className="relative flex flex-col justify-center px-10 py-14 xl:px-14">
+        <h2 className="text-xl font-semibold tracking-tight text-foreground">
+          Why merchants choose PayVantage
+        </h2>
+        <ul className="mt-8 max-w-md space-y-4 text-sm leading-relaxed text-foreground/85">
+          {WHY_BULLETS.map((line) => (
+            <li key={line} className="flex gap-3">
+              <span
+                className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"
+                aria-hidden
+              />
+              {line}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
@@ -131,7 +66,7 @@ export function AuthSplitShell({
           </Link>
           {children}
         </div>
-        <AuthMarqueePanel />
+        <WhyMerchantsPanel />
       </div>
     </div>
   );
