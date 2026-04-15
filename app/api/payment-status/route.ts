@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
-import { getPayramClient, mapPayramStatusToInternal } from "@/lib/payram";
+import { getRailProvider, isValidRail, type RailName } from "@/lib/rails";
 
 const supabaseUrl = process.env["NEXT_PUBLIC_SUPABASE_URL"]!;
 const supabaseServiceKey =
@@ -10,11 +10,12 @@ const supabaseServiceKey =
 export async function GET(request: NextRequest) {
   try {
     const referenceId = request.nextUrl.searchParams.get("reference_id");
+    const transactionId = request.nextUrl.searchParams.get("transaction_id");
     const merchantApiKey = request.headers.get("x-api-key");
 
-    if (!referenceId) {
+    if (!referenceId && !transactionId) {
       return NextResponse.json(
-        { error: "Missing reference_id query parameter" },
+        { error: "Missing reference_id or transaction_id query parameter" },
         { status: 400 }
       );
     }
@@ -41,12 +42,38 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { data: transaction } = await supabase
-      .from("transactions")
-      .select("*")
-      .eq("payram_reference_id", referenceId)
-      .eq("merchant_id", keyRecord.merchant_id)
-      .single();
+    // Look up by transaction_id first, then by provider_order_id, then legacy payram_reference_id
+    let transaction: Record<string, unknown> | null = null;
+
+    if (transactionId) {
+      const { data } = await supabase
+        .from("transactions")
+        .select("*")
+        .eq("id", transactionId)
+        .eq("merchant_id", keyRecord.merchant_id)
+        .single();
+      transaction = data;
+    }
+
+    if (!transaction && referenceId) {
+      const { data } = await supabase
+        .from("transactions")
+        .select("*")
+        .eq("provider_order_id", referenceId)
+        .eq("merchant_id", keyRecord.merchant_id)
+        .single();
+      transaction = data;
+    }
+
+    if (!transaction && referenceId) {
+      const { data } = await supabase
+        .from("transactions")
+        .select("*")
+        .eq("payram_reference_id", referenceId)
+        .eq("merchant_id", keyRecord.merchant_id)
+        .single();
+      transaction = data;
+    }
 
     if (!transaction) {
       return NextResponse.json(
@@ -55,34 +82,40 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (transaction.status === "pending" && referenceId) {
-      try {
-        const payram = getPayramClient();
-        const payramStatus = await payram.payments.getPaymentRequest(
-          referenceId
-        );
-        const newStatus = mapPayramStatusToInternal(
-          payramStatus.paymentState ?? "OPEN"
-        );
+    // If still pending, try to refresh from the rail provider
+    if (transaction.status === "pending") {
+      const rail = (transaction.payment_rail as string) ?? "payram";
+      const providerId =
+        (transaction.provider_order_id as string) ??
+        (transaction.payram_reference_id as string);
 
-        if (newStatus !== transaction.status) {
-          await supabase
-            .from("transactions")
-            .update({
-              status: newStatus,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", transaction.id);
-          transaction.status = newStatus;
+      if (providerId && isValidRail(rail)) {
+        try {
+          const provider = getRailProvider(rail as RailName);
+          if (provider.getPaymentStatus) {
+            const newStatus = await provider.getPaymentStatus(providerId);
+            if (newStatus !== transaction.status) {
+              await supabase
+                .from("transactions")
+                .update({
+                  status: newStatus,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("id", transaction.id);
+              transaction.status = newStatus;
+            }
+          }
+        } catch {
+          // Fall through with cached status
         }
-      } catch {
-        // Fall through with cached status
       }
     }
 
     return NextResponse.json({
       transaction_id: transaction.id,
-      reference_id: transaction.payram_reference_id,
+      reference_id:
+        transaction.provider_order_id ?? transaction.payram_reference_id,
+      rail: transaction.payment_rail ?? "payram",
       amount: transaction.amount,
       currency: transaction.currency,
       status: transaction.status,

@@ -12,6 +12,22 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
+const RAIL_OPTIONS = [
+  { value: "payram", label: "PayRam" },
+  { value: "inqud", label: "Inqud" },
+  { value: "alchemypay", label: "Alchemy Pay" },
+] as const;
+
+const RAIL_COLORS: Record<string, string> = {
+  payram: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
+  inqud: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
+  alchemypay: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
+};
+
+function railLabel(value: string): string {
+  return RAIL_OPTIONS.find((r) => r.value === value)?.label ?? value;
+}
+
 type MerchantSettings = {
   legal_business_name: string | null;
   business_registration_number: string | null;
@@ -30,6 +46,8 @@ type MerchantSettings = {
   preferred_chain: string | null;
   verification_status: string;
   verification_notes: string | null;
+  payment_rail: string;
+  fallback_rail: string | null;
 };
 
 type Merchant = {
@@ -47,6 +65,7 @@ export default function MerchantsPage(): ReactNode {
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [savingRail, setSavingRail] = useState<string | null>(null);
 
   const loadMerchants = useCallback(async () => {
     const supabase = createClient();
@@ -60,7 +79,8 @@ export default function MerchantsPage(): ReactNode {
            representative_first_name, representative_last_name,
            representative_email, representative_phone,
            business_type, website_url, wallet_address, preferred_chain,
-           verification_status, verification_notes
+           verification_status, verification_notes,
+           payment_rail, fallback_rail
          )`
       )
       .eq("role", "merchant")
@@ -91,6 +111,24 @@ export default function MerchantsPage(): ReactNode {
 
     await loadMerchants();
     setActing(null);
+  }
+
+  async function handleRailChange(
+    merchantId: string,
+    field: "payment_rail" | "fallback_rail",
+    value: string
+  ) {
+    setSavingRail(`${merchantId}-${field}`);
+    const supabase = createClient();
+    await supabase
+      .from("merchant_settings")
+      .update({
+        [field]: value === "" ? null : value,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("merchant_id", merchantId);
+    await loadMerchants();
+    setSavingRail(null);
   }
 
   function getSettings(m: Merchant): MerchantSettings | null {
@@ -128,6 +166,7 @@ export default function MerchantsPage(): ReactNode {
             const settings = getSettings(m);
             const isExpanded = expanded === m.id;
             const vStatus = settings?.verification_status ?? "pending";
+            const currentRail = settings?.payment_rail ?? "payram";
 
             return (
               <div
@@ -159,6 +198,13 @@ export default function MerchantsPage(): ReactNode {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        RAIL_COLORS[currentRail] ?? RAIL_COLORS.payram
+                      }`}
+                    >
+                      {railLabel(currentRail)}
+                    </span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                         m.onboarded
@@ -216,6 +262,80 @@ export default function MerchantsPage(): ReactNode {
                 {/* Expanded detail */}
                 {isExpanded && settings && (
                   <div className="border-t border-border px-4 pb-4 pt-3">
+                    {/* Rail routing controls */}
+                    <div className="mb-4 rounded-lg border border-border bg-background/50 p-3">
+                      <p className="mb-2 text-xs font-medium text-foreground">
+                        Payment Rail Routing
+                      </p>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-1 block text-xs text-muted-foreground">
+                            Primary Rail
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <select
+                              value={settings.payment_rail ?? "payram"}
+                              onChange={(e) =>
+                                handleRailChange(
+                                  m.id,
+                                  "payment_rail",
+                                  e.target.value
+                                )
+                              }
+                              disabled={
+                                savingRail === `${m.id}-payment_rail`
+                              }
+                              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground disabled:opacity-50"
+                            >
+                              {RAIL_OPTIONS.map((r) => (
+                                <option key={r.value} value={r.value}>
+                                  {r.label}
+                                </option>
+                              ))}
+                            </select>
+                            {savingRail === `${m.id}-payment_rail` && (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs text-muted-foreground">
+                            Fallback Rail
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <select
+                              value={settings.fallback_rail ?? ""}
+                              onChange={(e) =>
+                                handleRailChange(
+                                  m.id,
+                                  "fallback_rail",
+                                  e.target.value
+                                )
+                              }
+                              disabled={
+                                savingRail === `${m.id}-fallback_rail`
+                              }
+                              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground disabled:opacity-50"
+                            >
+                              <option value="">None</option>
+                              {RAIL_OPTIONS.filter(
+                                (r) =>
+                                  r.value !==
+                                  (settings.payment_rail ?? "payram")
+                              ).map((r) => (
+                                <option key={r.value} value={r.value}>
+                                  {r.label}
+                                </option>
+                              ))}
+                            </select>
+                            {savingRail === `${m.id}-fallback_rail` && (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       <Detail
                         label="Legal Name"

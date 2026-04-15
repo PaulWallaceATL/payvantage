@@ -103,6 +103,11 @@ create table if not exists public.merchant_settings (
   wallet_address text,
   preferred_chain text default 'BASE',
 
+  -- Multi-rail routing
+  payment_rail text not null default 'payram' check (payment_rail in ('payram', 'inqud', 'alchemypay')),
+  fallback_rail text check (fallback_rail is null or fallback_rail in ('payram', 'inqud', 'alchemypay')),
+  rail_config jsonb not null default '{}'::jsonb,
+
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -121,6 +126,9 @@ alter table public.merchant_settings add column if not exists representative_ema
 alter table public.merchant_settings add column if not exists representative_phone text;
 alter table public.merchant_settings add column if not exists verification_status text not null default 'pending';
 alter table public.merchant_settings add column if not exists verification_notes text;
+alter table public.merchant_settings add column if not exists payment_rail text not null default 'payram';
+alter table public.merchant_settings add column if not exists fallback_rail text;
+alter table public.merchant_settings add column if not exists rail_config jsonb not null default '{}'::jsonb;
 
 alter table public.merchant_settings enable row level security;
 
@@ -222,6 +230,9 @@ create table if not exists public.transactions (
   status text not null default 'pending' check (status in ('pending', 'completed', 'failed')),
   payram_checkout_id text unique,
   payram_reference_id text unique,
+  payment_rail text,
+  provider_order_id text,
+  provider_reference text,
   customer_email text,
   customer_id text,
   payment_url text,
@@ -232,6 +243,9 @@ create table if not exists public.transactions (
 alter table public.transactions add column if not exists payram_reference_id text unique;
 alter table public.transactions add column if not exists customer_id text;
 alter table public.transactions add column if not exists payment_url text;
+alter table public.transactions add column if not exists payment_rail text;
+alter table public.transactions add column if not exists provider_order_id text;
+alter table public.transactions add column if not exists provider_reference text;
 
 alter table public.transactions enable row level security;
 
@@ -259,6 +273,8 @@ create index if not exists idx_transactions_merchant_id on public.transactions(m
 create index if not exists idx_transactions_status on public.transactions(status);
 create index if not exists idx_transactions_payram_checkout_id on public.transactions(payram_checkout_id);
 create index if not exists idx_transactions_payram_reference_id on public.transactions(payram_reference_id);
+create index if not exists idx_transactions_provider_order_id on public.transactions(provider_order_id);
+create index if not exists idx_transactions_payment_rail on public.transactions(payment_rail);
 create index if not exists idx_api_keys_merchant_id on public.api_keys(merchant_id);
 create index if not exists idx_api_keys_publishable_key on public.api_keys(publishable_key);
 create index if not exists idx_merchant_settings_merchant_id on public.merchant_settings(merchant_id);
