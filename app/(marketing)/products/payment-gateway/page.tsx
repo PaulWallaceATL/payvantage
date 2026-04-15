@@ -1,5 +1,6 @@
+import { ProductHero } from "@/components/product-hero";
 import { createMetadata } from "@/lib/metadata";
-import Link from "next/link";
+import { Tags } from "lucide-react";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
@@ -10,36 +11,44 @@ export const metadata: Metadata = createMetadata({
   path: "/products/payment-gateway",
 });
 
+const HERO_IMAGE =
+  "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1400&q=80";
+
 export default function PaymentGatewayPage(): ReactNode {
   return (
-    <main id="main-content" className="flex-1 px-6 pt-28 pb-24 sm:px-8">
-      <article className="mx-auto max-w-2xl">
-        <h1 className="font-serif text-3xl font-medium text-foreground sm:text-4xl lg:text-5xl">
-          Payment gateway
-        </h1>
-        <div className="mt-8 space-y-4 text-base leading-relaxed text-muted-foreground">
-          <p>
-            PayVantage lets your customers check out with the payment methods
-            they already use: Visa, Mastercard, Apple Pay, and Google Pay. Behind
-            the scenes, funds can be routed into our card-to-crypto settlement
-            flow so you are not stuck on slow holds or card-network disputes in
-            the same way as legacy high-risk stacks.
-          </p>
-          <p>
-            Whether you run payment links or a full ecommerce integration, the
-            experience for shoppers stays familiar while you control where and
-            how funds land on your side.
-          </p>
-        </div>
-        <div className="mt-10">
-          <Link
-            href="/book-demo"
-            className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-8 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
-          >
-            Apply / Book a demo
-          </Link>
-        </div>
-      </article>
+    <main id="main-content" className="flex-1">
+      <ProductHero
+        badge="Payments"
+        badgeMuted="Visa · Mastercard · Apple Pay · Google Pay"
+        title="Accept the wallets your customers already use"
+        description={
+          <>
+            <p>
+              PayVantage lets shoppers pay with Visa, Mastercard, Apple Pay,
+              and Google Pay. Behind the scenes, funds can route into our
+              card-to-crypto flow so you avoid the slow holds and dispute
+              patterns common with legacy high-risk stacks.
+            </p>
+            <p>
+              Whether you use payment links or a full ecommerce integration, the
+              checkout experience stays familiar while you decide where funds
+              settle on your side.
+            </p>
+          </>
+        }
+        imageSrc={HERO_IMAGE}
+        imageAlt="Customer completing a card payment at checkout"
+        primaryCta={{ href: "/book-demo", label: "Apply / Book a demo" }}
+        secondaryCta={{
+          href: "/pricing",
+          label: "See pricing",
+          icon: Tags,
+        }}
+        social={{
+          emphasis: "One gateway,",
+          rest: "multiple familiar payment methods with stablecoin settlement options.",
+        }}
+      />
     </main>
   );
 }
