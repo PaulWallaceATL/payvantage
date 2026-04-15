@@ -17,8 +17,11 @@ export function HomePreloader(): ReactNode {
   const reduceMotion = useReducedMotion();
   const [phase, setPhase] = useState<"idle" | "run" | "exit" | "gone">("idle");
   const phaseRef = useRef(phase);
-  phaseRef.current = phase;
   const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
   const [progress, setProgress] = useState(0);
 
   const finish = useCallback(() => {
@@ -32,24 +35,27 @@ export function HomePreloader(): ReactNode {
 
   useLayoutEffect(() => {
     if (typeof window === "undefined") return;
+    const go = (next: "gone" | "run") => {
+      queueMicrotask(() => setPhase(next));
+    };
     if (reduceMotion) {
       try {
         sessionStorage.setItem(SESSION_KEY, "1");
       } catch {
         /* ignore */
       }
-      setPhase("gone");
+      go("gone");
       return;
     }
     try {
       if (sessionStorage.getItem(SESSION_KEY)) {
-        setPhase("gone");
+        go("gone");
         return;
       }
     } catch {
       /* ignore */
     }
-    setPhase("run");
+    go("run");
   }, [reduceMotion]);
 
   useEffect(() => {
@@ -63,17 +69,17 @@ export function HomePreloader(): ReactNode {
   useEffect(() => {
     if (phase !== "run") return;
     const start = performance.now();
-    const durationMs = 1500;
+    const durationMs = 1280;
 
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / durationMs);
-      const eased = 1 - (1 - t) * (1 - t);
-      setProgress(Math.min(100, Math.floor(eased * 100)));
+      const eased = t * t * (3 - 2 * t);
+      setProgress(Math.min(100, Math.round(eased * 100)));
       if (t < 1) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
         setProgress(100);
-        window.setTimeout(finish, 220);
+        window.setTimeout(finish, 180);
       }
     };
     rafRef.current = requestAnimationFrame(tick);
@@ -89,7 +95,7 @@ export function HomePreloader(): ReactNode {
       className="fixed inset-0 z-[10070] flex flex-col items-center justify-center bg-background px-6"
       initial={{ opacity: 1 }}
       animate={{ opacity: phase === "exit" ? 0 : 1 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
       onAnimationComplete={() => {
         if (phaseRef.current === "exit") setPhase("gone");
       }}
@@ -97,33 +103,26 @@ export function HomePreloader(): ReactNode {
       aria-live="polite"
       aria-label="Loading PayVantage"
     >
-      <div className="mb-10 flex items-center gap-2.5">
-        <span className="h-9 w-9 rounded-full bg-foreground" aria-hidden />
-        <span className="text-lg font-semibold tracking-tight text-foreground">
+      <div className="mb-12 flex items-center gap-3">
+        <span className="h-10 w-10 shrink-0 rounded-md bg-foreground" aria-hidden />
+        <span className="font-sans text-xl font-black uppercase tracking-[0.12em] text-foreground">
           PayVantage
         </span>
       </div>
 
-      <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+      <p className="mb-4 font-sans text-[11px] font-bold uppercase tracking-[0.35em] text-muted-foreground">
         Loading
       </p>
-      <motion.span
-        className="font-serif text-6xl font-medium tabular-nums tracking-tight text-foreground sm:text-7xl md:text-8xl"
-        key={progress}
-        initial={{ opacity: 0.65, y: 4 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.12 }}
-      >
-        {progress}
-        <span className="text-foreground/40">%</span>
-      </motion.span>
 
-      <div className="mt-10 h-1 w-[min(18rem,85vw)] overflow-hidden rounded-full bg-muted">
-        <motion.div
-          className="h-full rounded-full bg-accent"
-          initial={{ width: "0%" }}
-          animate={{ width: `${progress}%` }}
-          transition={{ type: "tween", duration: 0.08 }}
+      <div className="flex items-baseline gap-1 font-sans text-[clamp(4.5rem,14vw,9rem)] font-black tabular-nums leading-none tracking-tighter text-foreground">
+        <span>{progress}</span>
+        <span className="text-[0.45em] font-black text-muted-foreground">%</span>
+      </div>
+
+      <div className="mt-12 h-1.5 w-[min(20rem,88vw)] overflow-hidden rounded-sm bg-muted">
+        <div
+          className="h-full rounded-sm bg-accent transition-[width] duration-100 ease-out"
+          style={{ width: `${progress}%` }}
         />
       </div>
     </motion.div>
