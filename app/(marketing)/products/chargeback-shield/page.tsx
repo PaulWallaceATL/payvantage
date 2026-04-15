@@ -11,9 +11,6 @@ export const metadata: Metadata = createMetadata({
   path: "/products/chargeback-shield",
 });
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1400&q=80";
-
 export default function ChargebackShieldPage(): ReactNode {
   return (
     <main id="main-content" className="flex-1">
@@ -36,8 +33,21 @@ export default function ChargebackShieldPage(): ReactNode {
             </p>
           </>
         }
-        imageSrc={HERO_IMAGE}
-        imageAlt="Abstract representation of secure digital payments"
+        creditCard={{
+          cardNumber: "5425233430109903",
+          cardholderName: "FINAL SETTLEMENT",
+          expirationDate: "04/29",
+          cvv: "881",
+          background:
+            "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 40%, #2d2d2d 100%)",
+          textColor: "#f4d03f",
+          scale: 1.28,
+          borderRadius: 20,
+          hasTextShadow: true,
+          rotationIntensity: 1.1,
+          parallaxIntensity: 1.1,
+          scaleOnHover: 1.05,
+        }}
         primaryCta={{ href: "/book-demo", label: "Apply / Book a demo" }}
         secondaryCta={{
           href: "/docs",

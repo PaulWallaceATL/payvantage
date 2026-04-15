@@ -11,9 +11,6 @@ export const metadata: Metadata = createMetadata({
   path: "/products/instant-settlement",
 });
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1400&q=80";
-
 export default function InstantSettlementPage(): ReactNode {
   return (
     <main id="main-content" className="flex-1">
@@ -36,8 +33,20 @@ export default function InstantSettlementPage(): ReactNode {
             </p>
           </>
         }
-        imageSrc={HERO_IMAGE}
-        imageAlt="Business analytics and operations on a laptop"
+        creditCard={{
+          cardNumber: "6011111111111117",
+          cardholderName: "POLYGON WALLET",
+          expirationDate: "11/28",
+          cvv: "007",
+          background:
+            "linear-gradient(135deg, #0c1929 0%, #1e40af 42%, #6366f1 88%)",
+          textColor: "#f8fafc",
+          scale: 1.28,
+          borderRadius: 20,
+          rotationIntensity: 1.05,
+          parallaxIntensity: 1.05,
+          scaleOnHover: 1.04,
+        }}
         primaryCta={{ href: "/book-demo", label: "Apply / Book a demo" }}
         secondaryCta={{
           href: "/pricing",

@@ -1,5 +1,4 @@
-import { ArrowUpRight } from "lucide-react";
-import Image from "next/image";
+import { CreditCard, type CreditCardProps } from "@/components/credit-card";
 import Link from "next/link";
 import type { ComponentType, ReactNode, SVGProps } from "react";
 
@@ -8,17 +7,14 @@ export type ProductHeroProps = {
   badgeMuted?: string;
   title: string;
   description: ReactNode;
-  imageSrc: string;
-  imageAlt: string;
+  /** Props forwarded to the interactive [React Bits Pro–style](https://pro.reactbits.dev/docs/components/credit-card) credit card. */
+  creditCard: Partial<CreditCardProps>;
   primaryCta: { href: string; label: string };
   secondaryCta?: {
     href: string;
     label: string;
     icon?: ComponentType<SVGProps<SVGSVGElement>>;
   };
-  /** Optional FAB on the image (e.g. book demo). */
-  imageHref?: string;
-  imageHrefLabel?: string;
   social?: {
     emphasis: string;
     rest: string;
@@ -30,12 +26,9 @@ export function ProductHero({
   badgeMuted,
   title,
   description,
-  imageSrc,
-  imageAlt,
+  creditCard,
   primaryCta,
   secondaryCta,
-  imageHref = "/book-demo",
-  imageHrefLabel = "Book a demo",
   social = {
     emphasis: "USDC · Polygon",
     rest: "Settlement designed for high-risk categories.",
@@ -107,25 +100,28 @@ export function ProductHero({
           </div>
         </div>
 
-        <div className="relative mx-auto w-full max-w-lg lg:mx-0 lg:max-w-none">
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.75rem] bg-muted shadow-sm ring-1 ring-border sm:rounded-[2rem]">
-            <Image
-              src={imageSrc}
-              alt={imageAlt}
-              fill
-              priority
-              className="object-cover grayscale contrast-[1.02]"
-              sizes="(max-width: 1024px) 100vw, 50vw"
+        <div className="relative mx-auto flex w-full max-w-lg flex-col items-stretch lg:mx-0 lg:max-w-none">
+          <div className="flex min-h-[min(360px,70vw)] w-full items-center justify-center rounded-[1.75rem] bg-muted/30 px-4 py-10 ring-1 ring-border sm:rounded-[2rem] sm:px-8 sm:py-12">
+            <CreditCard
+              rotationIntensity={1}
+              parallaxIntensity={1}
+              borderRadius={18}
+              {...creditCard}
             />
-            <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-background/20 to-transparent" />
           </div>
-          <Link
-            href={imageHref}
-            className="absolute bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-xl bg-foreground text-background shadow-lg transition-transform hover:scale-105 active:scale-95 sm:bottom-5 sm:right-5"
-            aria-label={imageHrefLabel}
-          >
-            <ArrowUpRight className="h-5 w-5" aria-hidden />
-          </Link>
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            Interactive preview — move your pointer to tilt; click to flip and
+            see CVV (based on{" "}
+            <a
+              href="https://pro.reactbits.dev/docs/components/credit-card"
+              className="underline-offset-2 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              React Bits Pro
+            </a>
+            ).
+          </p>
         </div>
       </div>
     </section>

@@ -11,9 +11,6 @@ export const metadata: Metadata = createMetadata({
   path: "/products/payment-gateway",
 });
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1400&q=80";
-
 export default function PaymentGatewayPage(): ReactNode {
   return (
     <main id="main-content" className="flex-1">
@@ -36,8 +33,20 @@ export default function PaymentGatewayPage(): ReactNode {
             </p>
           </>
         }
-        imageSrc={HERO_IMAGE}
-        imageAlt="Customer completing a card payment at checkout"
+        creditCard={{
+          cardNumber: "4532123456789010",
+          cardholderName: "MERCHANT ACCOUNT",
+          expirationDate: "08/27",
+          cvv: "042",
+          background:
+            "linear-gradient(135deg, #0f2942 0%, #1e5a8e 45%, #2a7cc7 100%)",
+          textColor: "#ffffff",
+          scale: 1.28,
+          borderRadius: 20,
+          rotationIntensity: 1.05,
+          parallaxIntensity: 1.05,
+          scaleOnHover: 1.04,
+        }}
         primaryCta={{ href: "/book-demo", label: "Apply / Book a demo" }}
         secondaryCta={{
           href: "/pricing",
