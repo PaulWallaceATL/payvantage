@@ -20,7 +20,7 @@ const featuresList: FeatureCard[] = [
     title: "Traditional card processing",
     description:
       "We place qualified merchants with our network of high-risk acquiring banks. Full Visa, Mastercard, Amex support with competitive rates and fast approvals.",
-    href: "/book-demo",
+    href: "/products/payment-gateway",
     visual: "comparison",
   },
   {
@@ -34,7 +34,7 @@ const featuresList: FeatureCard[] = [
     title: "Simple integration",
     description:
       "WooCommerce plugin installs in minutes. Shopify and custom API coming soon. One Merchant ID, no crypto knowledge required.",
-    href: "/docs",
+    href: "/products/woocommerce",
     visual: "code",
   },
 ];
@@ -43,7 +43,7 @@ function ComparisonVisual(): ReactNode {
   const rows = [
     {
       name: "PayVantage",
-      approval: "48–72 hours",
+      approval: "1–2 weeks",
       reserves: "Competitive terms",
       highlight: true,
     },

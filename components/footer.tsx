@@ -8,6 +8,7 @@ const footerLinks = {
     title: "Product",
     links: [
       { label: "Payment gateway", href: "/products/payment-gateway" },
+      { label: "WooCommerce plugin", href: "/products/woocommerce" },
       { label: "Chargeback shield", href: "/products/chargeback-shield" },
       { label: "Instant settlement", href: "/products/instant-settlement" },
       { label: "Integrations", href: "/dashboard/integrations" },

@@ -22,13 +22,14 @@ export default function PaymentGatewayPage(): ReactNode {
           <>
             <p>
               PayVantage lets shoppers pay with Visa, Mastercard, Apple Pay,
-              and Google Pay. Behind the scenes, funds can route into our
-              card-to-crypto flow so you avoid the slow holds and dispute
-              patterns common with legacy high-risk stacks.
+              and Google Pay. For traditional processing, we connect you with
+              high-risk-friendly acquiring; for the USDC rail, cleared funds can
+              settle to your wallet so you avoid the slow holds and dispute
+              patterns common with legacy stacks.
             </p>
             <p>
               Whether you use payment links or a full ecommerce integration, the
-              checkout experience stays familiar while you decide where funds
+              checkout experience stays familiar while you choose how funds
               settle on your side.
             </p>
           </>

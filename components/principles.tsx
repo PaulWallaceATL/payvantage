@@ -28,7 +28,7 @@ const principles: PrincipleCard[] = [
   {
     icon: <Zap className="h-10 w-10" strokeWidth={1} />,
     title: "Fast Approvals",
-    body: "Traditional accounts approved in 48–72 hours. USDC accounts go live same day.",
+    body: "Traditional accounts approved in 1–2 weeks. USDC accounts go live same day.",
   },
   {
     icon: <Plug className="h-10 w-10" strokeWidth={1} />,

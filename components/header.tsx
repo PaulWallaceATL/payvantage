@@ -19,22 +19,25 @@ const navLinks: NavItem[] = [
     items: [
       {
         label: "Traditional Processing",
-        description: "High-risk card processing with fast approvals",
-        href: "/book-demo",
+        description:
+          "High-risk card processing with fast approvals and competitive rates",
+        href: "/products/payment-gateway",
       },
       {
         label: "USDC Settlement",
-        description: "Card checkout with instant USDC settlement",
+        description:
+          "Accept cards, settle instantly in USDC to your Polygon wallet. Zero chargebacks.",
         href: "/products/instant-settlement",
       },
       {
         label: "WooCommerce Plugin",
-        description: "Plugin, Merchant ID, go live in minutes",
-        href: "/docs",
+        description:
+          "Install our plugin, enter your Merchant ID, and start accepting payments in minutes",
+        href: "/products/woocommerce",
       },
       {
         label: "API & SDKs",
-        description: "REST API, webhooks, and integration docs",
+        description: "Setup, requirements, and integration guidance",
         href: "/docs",
       },
     ],
@@ -57,18 +60,25 @@ function DesktopDropdownLink({
   item: { label: string; description: string; href: string };
 }): ReactNode {
   const className =
-    "flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted";
-  const inner = <span className="truncate">{item.label}</span>;
+    "block rounded-lg px-3 py-2.5 transition-colors hover:bg-white/10";
+  const body = (
+    <>
+      <div className="text-sm font-medium text-foreground">{item.label}</div>
+      <p className="mt-0.5 text-xs leading-snug text-neutral-400">
+        {item.description}
+      </p>
+    </>
+  );
   if (item.href.startsWith("/")) {
     return (
-      <Link href={item.href} className={className} title={item.description}>
-        {inner}
+      <Link href={item.href} className={className}>
+        {body}
       </Link>
     );
   }
   return (
-    <a href={item.href} className={className} title={item.description}>
-      {inner}
+    <a href={item.href} className={className}>
+      {body}
     </a>
   );
 }
@@ -163,7 +173,7 @@ function DesktopDropdown({
       <AnimatePresence>
         {isOpen ? (
           <div
-            className="absolute left-1/2 top-full z-[10021] min-w-[13.5rem] -translate-x-1/2 pt-2"
+            className="absolute left-1/2 top-full z-[10021] min-w-[18rem] max-w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 pt-2"
             role="presentation"
           >
             <motion.div
@@ -171,9 +181,9 @@ function DesktopDropdown({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.96 }}
               transition={{ duration: 0.2, ease }}
-              className="overflow-hidden rounded-2xl border border-border/90 bg-background p-1.5 shadow-xl ring-1 ring-white/10"
+              className="isolate mix-blend-normal overflow-hidden rounded-2xl border border-neutral-700 bg-[#070712] p-1.5 shadow-2xl"
             >
-              <div className="flex flex-col gap-0.5">
+              <div className="flex flex-col gap-1">
                 {items.map((item) => (
                   <DesktopDropdownLink key={item.label} item={item} />
                 ))}
