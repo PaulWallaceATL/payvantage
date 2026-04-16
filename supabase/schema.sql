@@ -129,6 +129,13 @@ alter table public.merchant_settings add column if not exists verification_notes
 alter table public.merchant_settings add column if not exists payment_rail text not null default 'payram';
 alter table public.merchant_settings add column if not exists fallback_rail text;
 alter table public.merchant_settings add column if not exists rail_config jsonb not null default '{}'::jsonb;
+alter table public.merchant_settings add column if not exists application_submitted_at timestamptz;
+alter table public.merchant_settings add column if not exists business_description text;
+alter table public.merchant_settings add column if not exists expected_monthly_volume text;
+alter table public.merchant_settings add column if not exists cold_wallet_address text;
+alter table public.merchant_settings add column if not exists settlement_notes text;
+alter table public.merchant_settings add column if not exists payram_success_redirect_url text;
+alter table public.merchant_settings add column if not exists payram_cancel_redirect_url text;
 
 alter table public.merchant_settings enable row level security;
 
@@ -166,6 +173,44 @@ create policy "Admins can update all settings"
       where id = auth.uid() and role = 'admin'
     )
   );
+
+
+-- ============================================================================
+-- MERCHANT PAYRAM CREDENTIALS (server + admin only — not readable by merchants)
+-- API key selects the PayRam project on the processor; optional base URL override.
+-- ============================================================================
+
+create table if not exists public.merchant_payram_credentials (
+  merchant_id uuid primary key references public.profiles(id) on delete cascade,
+  payram_project_id text,
+  payram_project_name text,
+  api_key text not null,
+  payram_base_url text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.merchant_payram_credentials enable row level security;
+
+drop policy if exists "Admins manage merchant PayRam credentials" on public.merchant_payram_credentials;
+create policy "Admins manage merchant PayRam credentials"
+  on public.merchant_payram_credentials for all
+  using (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid() and role = 'admin'
+    )
+  )
+  with check (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid() and role = 'admin'
+    )
+  );
+
+-- One PayRam API key = one processor project; prevent assigning the same key to two merchants.
+create unique index if not exists idx_merchant_payram_credentials_api_key_unique
+  on public.merchant_payram_credentials (api_key);
 
 
 -- ============================================================================

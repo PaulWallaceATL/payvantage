@@ -48,6 +48,14 @@ const CHAINS = [
   { value: "POLYGON", label: "Polygon" },
 ];
 
+const MONTHLY_VOLUME_OPTIONS = [
+  "Under $10k / month",
+  "$10k – $50k / month",
+  "$50k – $250k / month",
+  "$250k+ / enterprise",
+  "Not sure yet",
+] as const;
+
 export default function OnboardingPage(): ReactNode {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -57,6 +65,7 @@ export default function OnboardingPage(): ReactNode {
   // Step 1: Business basics
   const [companyName, setCompanyName] = useState("");
   const [businessType, setBusinessType] = useState("");
+  const [businessDescription, setBusinessDescription] = useState("");
 
   // Step 2: Business verification
   const [legalBusinessName, setLegalBusinessName] = useState("");
@@ -70,13 +79,18 @@ export default function OnboardingPage(): ReactNode {
   const [repLastName, setRepLastName] = useState("");
   const [repEmail, setRepEmail] = useState("");
   const [repPhone, setRepPhone] = useState("");
+  const [expectedMonthlyVolume, setExpectedMonthlyVolume] = useState("");
 
   // Step 3: Integration
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [webhookUrl, setWebhookUrl] = useState("");
+  const [payramSuccessRedirectUrl, setPayramSuccessRedirectUrl] = useState("");
+  const [payramCancelRedirectUrl, setPayramCancelRedirectUrl] = useState("");
 
   // Step 4: Wallet
   const [walletAddress, setWalletAddress] = useState("");
+  const [coldWalletAddress, setColdWalletAddress] = useState("");
+  const [settlementNotes, setSettlementNotes] = useState("");
   const [preferredChain, setPreferredChain] = useState("BASE");
 
   async function handleSubmit(e: FormEvent) {
@@ -96,12 +110,16 @@ export default function OnboardingPage(): ReactNode {
         return;
       }
 
+      const submittedAt = new Date().toISOString();
+
       const { error: settingsError } = await supabase
         .from("merchant_settings")
         .upsert({
           merchant_id: user.id,
           company_name: companyName,
           business_type: businessType,
+          business_description: businessDescription.trim() || null,
+          expected_monthly_volume: expectedMonthlyVolume || null,
           legal_business_name: legalBusinessName || null,
           business_registration_number: registrationNumber || null,
           country: country || null,
@@ -115,10 +133,15 @@ export default function OnboardingPage(): ReactNode {
           representative_phone: repPhone || null,
           website_url: websiteUrl || null,
           webhook_url: webhookUrl || null,
+          payram_success_redirect_url: payramSuccessRedirectUrl.trim() || null,
+          payram_cancel_redirect_url: payramCancelRedirectUrl.trim() || null,
           wallet_address: walletAddress || null,
+          cold_wallet_address: coldWalletAddress.trim() || null,
+          settlement_notes: settlementNotes.trim() || null,
           preferred_chain: preferredChain,
           verification_status: "pending",
-          updated_at: new Date().toISOString(),
+          application_submitted_at: submittedAt,
+          updated_at: submittedAt,
         });
 
       if (settingsError) {
@@ -148,12 +171,22 @@ export default function OnboardingPage(): ReactNode {
 
   function canAdvance(): boolean {
     if (step === 0)
-      return companyName.trim().length > 0 && businessType.length > 0;
+      return (
+        companyName.trim().length > 0 &&
+        businessType.length > 0 &&
+        businessDescription.trim().length > 0
+      );
     if (step === 1)
       return (
         repFirstName.trim().length > 0 &&
         repLastName.trim().length > 0 &&
-        country.length > 0
+        country.length > 0 &&
+        expectedMonthlyVolume.length > 0
+      );
+    if (step === 3)
+      return (
+        walletAddress.trim().length > 0 &&
+        coldWalletAddress.trim().length > 0
       );
     return true;
   }
@@ -168,8 +201,9 @@ export default function OnboardingPage(): ReactNode {
           Set up your business
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Complete these steps to start accepting payments. Your business info
-          will be reviewed before your account is activated.
+          Complete this application with your business, settlement, and payout
+          details. After you submit, the account stays in review until our team
+          approves it and connects your payment project.
         </p>
       </div>
 
@@ -249,6 +283,19 @@ export default function OnboardingPage(): ReactNode {
                   ))}
                 </div>
               </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  What do you sell or do? *
+                </label>
+                <textarea
+                  value={businessDescription}
+                  onChange={(e) => setBusinessDescription(e.target.value)}
+                  required
+                  rows={4}
+                  placeholder="Products, services, average order value, customer regions, and anything material for risk or compliance."
+                  className={`${inputClass} min-h-[100px] resize-y py-3`}
+                />
+              </div>
             </div>
           )}
 
@@ -289,6 +336,25 @@ export default function OnboardingPage(): ReactNode {
                     className={inputClass}
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  Expected card / payment volume *
+                </label>
+                <select
+                  value={expectedMonthlyVolume}
+                  onChange={(e) => setExpectedMonthlyVolume(e.target.value)}
+                  required
+                  className={inputClass}
+                >
+                  <option value="">Select range...</option>
+                  {MONTHLY_VOLUME_OPTIONS.map((v) => (
+                    <option key={v} value={v}>
+                      {v}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -460,6 +526,37 @@ export default function OnboardingPage(): ReactNode {
                 </p>
               </div>
 
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-foreground">
+                    Checkout success redirect URL
+                  </label>
+                  <input
+                    type="url"
+                    value={payramSuccessRedirectUrl}
+                    onChange={(e) => setPayramSuccessRedirectUrl(e.target.value)}
+                    placeholder="https://yoursite.com/thanks"
+                    className={inputClass}
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Optional. We will mirror this into your processor project
+                    after approval.
+                  </p>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-foreground">
+                    Checkout cancel redirect URL
+                  </label>
+                  <input
+                    type="url"
+                    value={payramCancelRedirectUrl}
+                    onChange={(e) => setPayramCancelRedirectUrl(e.target.value)}
+                    placeholder="https://yoursite.com/cart"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
               <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-4">
                 <p className="text-sm font-medium text-foreground">
                   Customer KYC
@@ -502,7 +599,7 @@ export default function OnboardingPage(): ReactNode {
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">
-                  Payout Wallet Address
+                  Hot / settlement wallet address *
                 </label>
                 <input
                   type="text"
@@ -512,27 +609,58 @@ export default function OnboardingPage(): ReactNode {
                   className={`font-mono ${inputClass}`}
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  The wallet where settled funds will be sent. You can add this
-                  later in Settings.
+                  Primary address where you want customer payments consolidated
+                  for your default chain.
                 </p>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  Cold wallet address *
+                </label>
+                <input
+                  type="text"
+                  value={coldWalletAddress}
+                  onChange={(e) => setColdWalletAddress(e.target.value)}
+                  placeholder="Hardware wallet or vault address"
+                  className={`font-mono ${inputClass}`}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Long-term storage address (can match your settlement wallet if
+                  you only use one vault).
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  Wallet & payout notes
+                </label>
+                <textarea
+                  value={settlementNotes}
+                  onChange={(e) => setSettlementNotes(e.target.value)}
+                  rows={3}
+                  placeholder="Master wallet custody, gas refill preferences, Tron vs EVM, who holds keys, etc."
+                  className={`${inputClass} min-h-[80px] resize-y py-3`}
+                />
               </div>
 
               <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
                 <p className="text-sm font-medium text-foreground">
-                  What happens next?
+                  After you submit
                 </p>
                 <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
                   <li>
-                    1. Your business info will be reviewed by our team (usually
-                    within 24 hours).
+                    1. Your application is marked{" "}
+                    <span className="font-medium text-foreground">in review</span>
+                    . We may reach out if anything is missing.
                   </li>
                   <li>
-                    2. Once approved, you&apos;ll be able to create API keys and
-                    start accepting payments.
+                    2. When approved, we attach your live payment project and you
+                    can create API keys and payment links in the dashboard.
                   </li>
                   <li>
-                    3. Customer KYC is handled automatically on the payment page
-                    for card-to-crypto purchases.
+                    3. End-customer KYC for card routes is handled on the payment
+                    page when applicable.
                   </li>
                 </ul>
               </div>
@@ -577,7 +705,7 @@ export default function OnboardingPage(): ReactNode {
                 </>
               ) : (
                 <>
-                  Complete Setup
+                  Submit application
                   <Check className="h-4 w-4" />
                 </>
               )}

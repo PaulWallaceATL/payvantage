@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
+import { getPayramClientForMerchant } from "@/lib/payram";
 import { getRailProvider, isValidRail, type RailName } from "@/lib/rails";
 
 const supabaseUrl = process.env["NEXT_PUBLIC_SUPABASE_URL"]!;
@@ -91,7 +92,19 @@ export async function GET(request: NextRequest) {
 
       if (providerId && isValidRail(rail)) {
         try {
-          const provider = getRailProvider(rail as RailName);
+          const payramClient =
+            rail === "payram"
+              ? await getPayramClientForMerchant(
+                  supabase,
+                  keyRecord.merchant_id
+                )
+              : undefined;
+          const provider = getRailProvider(
+            rail as RailName,
+            rail === "payram" && payramClient
+              ? { payramClient }
+              : undefined
+          );
           if (provider.getPaymentStatus) {
             const newStatus = await provider.getPaymentStatus(providerId);
             if (newStatus !== transaction.status) {

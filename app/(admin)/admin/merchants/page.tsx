@@ -41,13 +41,26 @@ type MerchantSettings = {
   representative_email: string | null;
   representative_phone: string | null;
   business_type: string | null;
+  business_description: string | null;
+  expected_monthly_volume: string | null;
   website_url: string | null;
   wallet_address: string | null;
+  cold_wallet_address: string | null;
+  settlement_notes: string | null;
+  payram_success_redirect_url: string | null;
+  payram_cancel_redirect_url: string | null;
+  application_submitted_at: string | null;
   preferred_chain: string | null;
   verification_status: string;
   verification_notes: string | null;
   payment_rail: string;
   fallback_rail: string | null;
+};
+
+type PayramCredentialRow = {
+  payram_project_id: string | null;
+  payram_project_name: string | null;
+  payram_base_url: string | null;
 };
 
 type Merchant = {
@@ -58,6 +71,7 @@ type Merchant = {
   onboarded: boolean;
   created_at: string;
   merchant_settings: MerchantSettings[] | null;
+  merchant_payram_credentials: PayramCredentialRow[] | null;
 };
 
 export default function MerchantsPage(): ReactNode {
@@ -66,6 +80,12 @@ export default function MerchantsPage(): ReactNode {
   const [acting, setActing] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [savingRail, setSavingRail] = useState<string | null>(null);
+  const [payramProjectId, setPayramProjectId] = useState("");
+  const [payramProjectName, setPayramProjectName] = useState("");
+  const [payramApiKey, setPayramApiKey] = useState("");
+  const [payramBaseUrl, setPayramBaseUrl] = useState("");
+  const [savingPayram, setSavingPayram] = useState(false);
+  const [payramError, setPayramError] = useState<string | null>(null);
 
   const loadMerchants = useCallback(async () => {
     const supabase = createClient();
@@ -78,9 +98,15 @@ export default function MerchantsPage(): ReactNode {
            business_address, city, state_province, postal_code,
            representative_first_name, representative_last_name,
            representative_email, representative_phone,
-           business_type, website_url, wallet_address, preferred_chain,
+           business_type, business_description, expected_monthly_volume,
+           website_url, wallet_address, cold_wallet_address, settlement_notes,
+           payram_success_redirect_url, payram_cancel_redirect_url,
+           application_submitted_at, preferred_chain,
            verification_status, verification_notes,
            payment_rail, fallback_rail
+         ),
+         merchant_payram_credentials (
+           payram_project_id, payram_project_name, payram_base_url
          )`
       )
       .eq("role", "merchant")
@@ -92,6 +118,52 @@ export default function MerchantsPage(): ReactNode {
   useEffect(() => {
     loadMerchants();
   }, [loadMerchants]);
+
+  useEffect(() => {
+    setPayramError(null);
+    if (!expanded) {
+      setPayramProjectId("");
+      setPayramProjectName("");
+      setPayramApiKey("");
+      setPayramBaseUrl("");
+      return;
+    }
+    const m = merchants.find((row) => row.id === expanded);
+    const creds = m?.merchant_payram_credentials?.[0];
+    setPayramProjectId(creds?.payram_project_id ?? "");
+    setPayramProjectName(creds?.payram_project_name ?? "");
+    setPayramApiKey("");
+    setPayramBaseUrl(creds?.payram_base_url ?? "");
+  }, [expanded, merchants]);
+
+  async function handleSavePayramCredentials(merchantId: string) {
+    setPayramError(null);
+    setSavingPayram(true);
+    try {
+      const res = await fetch("/api/admin/merchant-payram", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          merchant_id: merchantId,
+          payram_project_id: payramProjectId || null,
+          payram_project_name: payramProjectName || null,
+          api_key: payramApiKey.trim() || undefined,
+          payram_base_url: payramBaseUrl.trim() || null,
+        }),
+      });
+      const payload = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setPayramError(payload.error ?? "Save failed");
+        setSavingPayram(false);
+        return;
+      }
+      setPayramApiKey("");
+      await loadMerchants();
+    } catch {
+      setPayramError("Save failed");
+    }
+    setSavingPayram(false);
+  }
 
   async function handleApproval(merchantId: string, approve: boolean) {
     setActing(merchantId);
@@ -263,6 +335,90 @@ export default function MerchantsPage(): ReactNode {
                 {isExpanded && settings && (
                   <div className="border-t border-border px-4 pb-4 pt-3">
                     {/* Rail routing controls */}
+                    <div className="mb-4 rounded-lg border border-violet-500/20 bg-violet-500/5 p-3">
+                      <p className="mb-2 text-xs font-medium text-foreground">
+                        PayRam project (per-merchant API key)
+                      </p>
+                      <p className="mb-3 text-xs text-muted-foreground">
+                        Create the project in PayRam, then paste the project API
+                        key here so checkout and webhooks use that project.
+                        Leave API key blank to only update project metadata or
+                        base URL.
+                      </p>
+                      {payramError && (
+                        <p className="mb-2 text-xs text-red-500">{payramError}</p>
+                      )}
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-1 block text-xs text-muted-foreground">
+                            PayRam project ID (reference)
+                          </label>
+                          <input
+                            value={payramProjectId}
+                            onChange={(e) => setPayramProjectId(e.target.value)}
+                            placeholder="e.g. 3"
+                            className="w-full rounded-md border border-border bg-background px-2 py-1.5 font-mono text-sm text-foreground"
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs text-muted-foreground">
+                            Project name (label)
+                          </label>
+                          <input
+                            value={payramProjectName}
+                            onChange={(e) =>
+                              setPayramProjectName(e.target.value)
+                            }
+                            placeholder="Acme Store"
+                            className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="mb-1 block text-xs text-muted-foreground">
+                            API key (secret)
+                          </label>
+                          <input
+                            type="password"
+                            autoComplete="new-password"
+                            value={payramApiKey}
+                            onChange={(e) => setPayramApiKey(e.target.value)}
+                            placeholder={
+                              m.merchant_payram_credentials?.[0]
+                                ? "Paste new key to rotate"
+                                : "Paste project API key"
+                            }
+                            className="w-full rounded-md border border-border bg-background px-2 py-1.5 font-mono text-sm text-foreground"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="mb-1 block text-xs text-muted-foreground">
+                            Base URL override (optional)
+                          </label>
+                          <input
+                            value={payramBaseUrl}
+                            onChange={(e) => setPayramBaseUrl(e.target.value)}
+                            placeholder="http://host:8080 — defaults from server env if empty"
+                            className="w-full rounded-md border border-border bg-background px-2 py-1.5 font-mono text-sm text-foreground"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSavePayramCredentials(m.id)}
+                        disabled={savingPayram}
+                        className="mt-3 rounded-lg bg-foreground px-3 py-1.5 text-xs font-medium text-background hover:bg-foreground/90 disabled:opacity-50"
+                      >
+                        {savingPayram ? (
+                          <span className="flex items-center gap-1">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Saving…
+                          </span>
+                        ) : (
+                          "Save PayRam credentials"
+                        )}
+                      </button>
+                    </div>
+
                     <div className="mb-4 rounded-lg border border-border bg-background/50 p-3">
                       <p className="mb-2 text-xs font-medium text-foreground">
                         Payment Rail Routing
@@ -338,6 +494,20 @@ export default function MerchantsPage(): ReactNode {
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       <Detail
+                        label="Application submitted"
+                        value={
+                          settings.application_submitted_at
+                            ? new Date(
+                                settings.application_submitted_at
+                              ).toLocaleString()
+                            : null
+                        }
+                      />
+                      <Detail
+                        label="Expected volume"
+                        value={settings.expected_monthly_volume}
+                      />
+                      <Detail
                         label="Legal Name"
                         value={settings.legal_business_name}
                       />
@@ -366,6 +536,18 @@ export default function MerchantsPage(): ReactNode {
                         value={settings.website_url}
                       />
                       <Detail
+                        label="Business description"
+                        value={settings.business_description}
+                      />
+                      <Detail
+                        label="Success redirect URL"
+                        value={settings.payram_success_redirect_url}
+                      />
+                      <Detail
+                        label="Cancel redirect URL"
+                        value={settings.payram_cancel_redirect_url}
+                      />
+                      <Detail
                         label="Representative"
                         value={
                           settings.representative_first_name ||
@@ -383,9 +565,18 @@ export default function MerchantsPage(): ReactNode {
                         value={settings.representative_phone}
                       />
                       <Detail
-                        label="Wallet"
+                        label="Settlement wallet"
                         value={settings.wallet_address}
                         mono
+                      />
+                      <Detail
+                        label="Cold wallet"
+                        value={settings.cold_wallet_address}
+                        mono
+                      />
+                      <Detail
+                        label="Wallet / payout notes"
+                        value={settings.settlement_notes}
                       />
                       <Detail
                         label="Chain"

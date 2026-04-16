@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { getPayramClientForMerchant } from "@/lib/payram";
 import {
   getRailProvider,
   getWebhookUrl,
@@ -50,6 +51,7 @@ export async function POST(request: Request) {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Publishable key → exactly one merchant_id. All PayRam secrets are loaded by that id only.
     const { data: keyRecord, error: keyError } = await supabase
       .from("api_keys")
       .select("merchant_id, is_active")
@@ -101,6 +103,36 @@ export async function POST(request: Request) {
         ? (merchantSettings.fallback_rail as RailName)
         : null;
 
+    const needsPayramClient =
+      primaryRail === "payram" || fallbackRail === "payram";
+
+    let payramClient: Awaited<
+      ReturnType<typeof getPayramClientForMerchant>
+    > | undefined;
+    if (needsPayramClient) {
+      try {
+        payramClient = await getPayramClientForMerchant(
+          supabase,
+          keyRecord.merchant_id
+        );
+      } catch (err) {
+        console.error("PayRam client for merchant:", err);
+        return NextResponse.json(
+          {
+            error:
+              "Payment processor is not configured for this merchant. Contact support.",
+          },
+          { status: 503 }
+        );
+      }
+    }
+
+    function payramOpts(rail: RailName) {
+      return rail === "payram" && payramClient
+        ? { payramClient }
+        : undefined;
+    }
+
     const walletAddress =
       merchantSettings?.wallet_address ?? "";
     const chain = merchantSettings?.preferred_chain ?? "BASE";
@@ -137,7 +169,7 @@ export async function POST(request: Request) {
     let usedRail = primaryRail;
     let paymentResult;
     try {
-      const provider = getRailProvider(primaryRail);
+      const provider = getRailProvider(primaryRail, payramOpts(primaryRail));
       paymentResult = await provider.createPayment({
         amount,
         currency: currency.toUpperCase(),
@@ -156,7 +188,10 @@ export async function POST(request: Request) {
       if (fallbackRail && fallbackRail !== primaryRail) {
         try {
           usedRail = fallbackRail;
-          const fallbackProvider = getRailProvider(fallbackRail);
+          const fallbackProvider = getRailProvider(
+            fallbackRail,
+            payramOpts(fallbackRail)
+          );
           paymentResult = await fallbackProvider.createPayment({
             amount,
             currency: currency.toUpperCase(),

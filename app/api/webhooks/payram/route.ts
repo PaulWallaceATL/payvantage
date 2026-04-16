@@ -1,27 +1,21 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { verifyApiKey } from "payram";
-import { mapPayramStatusToInternal } from "@/lib/payram";
+import {
+  getPayramWebhookApiKeyForMerchant,
+  mapPayramStatusToInternal,
+} from "@/lib/payram";
 
 const supabaseUrl = process.env["NEXT_PUBLIC_SUPABASE_URL"]!;
 const supabaseServiceKey =
   process.env["SUPABASE_SERVICE_ROLE_KEY"] ??
   process.env["NEXT_PUBLIC_SUPABASE_ANON_KEY"]!;
-const payramApiKey = process.env["PAYRAM_API_KEY"] ?? "";
-
 export async function POST(request: Request) {
   try {
     const headers: Record<string, string | undefined> = {};
     request.headers.forEach((value, key) => {
       headers[key] = value;
     });
-
-    if (payramApiKey && !verifyApiKey(headers, payramApiKey)) {
-      return NextResponse.json(
-        { error: "Invalid API key" },
-        { status: 401 }
-      );
-    }
 
     const body = (await request.json()) as Record<string, unknown>;
 
@@ -52,6 +46,17 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Transaction not found" },
         { status: 404 }
+      );
+    }
+
+    const keyToVerify = await getPayramWebhookApiKeyForMerchant(
+      supabase,
+      transaction.merchant_id
+    );
+    if (keyToVerify && !verifyApiKey(headers, keyToVerify)) {
+      return NextResponse.json(
+        { error: "Invalid API key" },
+        { status: 401 }
       );
     }
 

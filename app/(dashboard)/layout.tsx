@@ -19,13 +19,23 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("onboarded, role")
+    .select("onboarded, role, approved")
     .eq("id", user.id)
     .single();
 
   if (profile?.role === "admin") {
     redirect("/admin");
   }
+
+  const { data: merchantRow } = await supabase
+    .from("merchant_settings")
+    .select("application_submitted_at")
+    .eq("merchant_id", user.id)
+    .maybeSingle();
+
+  const showApplicationReview =
+    Boolean(merchantRow?.application_submitted_at) &&
+    profile?.approved === false;
 
   return (
     <div className="flex min-h-screen">
@@ -34,6 +44,16 @@ export default async function DashboardLayout({
         onboarded={profile?.onboarded ?? false}
       />
       <main className="flex-1 overflow-y-auto bg-background p-6 lg:p-8">
+        {showApplicationReview && (
+          <div className="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-foreground">
+            <p className="font-medium">Application in review</p>
+            <p className="mt-1 text-muted-foreground">
+              Thanks for submitting your business and wallet details. Our team
+              will notify you once your account is approved and your payment
+              project is connected.
+            </p>
+          </div>
+        )}
         {children}
       </main>
     </div>

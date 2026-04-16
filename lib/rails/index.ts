@@ -1,18 +1,31 @@
+import type { Payram } from "payram";
 import type { RailName, RailProvider } from "./types";
-import { payramProvider } from "./payram";
+import { createPayramProvider } from "./payram";
 import { inqudProvider } from "./inqud";
 import { alchemyPayProvider } from "./alchemy-pay";
+import { getPayramClient } from "@/lib/payram";
 
 export type { RailName, RailProvider, CreatePaymentParams, CreatePaymentResult } from "./types";
 
-const providers: Record<RailName, RailProvider> = {
-  payram: payramProvider,
+const otherProviders: Record<Exclude<RailName, "payram">, RailProvider> = {
   inqud: inqudProvider,
   alchemypay: alchemyPayProvider,
 };
 
-export function getRailProvider(rail: RailName): RailProvider {
-  const provider = providers[rail];
+export type RailProviderOptions = {
+  /** When set, PayRam calls use this client (merchant project API key). */
+  payramClient?: Payram;
+};
+
+export function getRailProvider(
+  rail: RailName,
+  options?: RailProviderOptions
+): RailProvider {
+  if (rail === "payram") {
+    const client = options?.payramClient ?? getPayramClient();
+    return createPayramProvider(client);
+  }
+  const provider = otherProviders[rail as Exclude<RailName, "payram">];
   if (!provider) {
     throw new Error(`Unknown payment rail: ${rail}`);
   }

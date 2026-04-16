@@ -33,6 +33,9 @@ export default function PaymentsPage(): ReactNode {
   const [amount, setAmount] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [apiKey, setApiKey] = useState<string | null>(null);
+  const [accountApproved, setAccountApproved] = useState<boolean | null>(null);
+  const [applicationSubmitted, setApplicationSubmitted] =
+    useState<boolean>(false);
 
   const loadData = useCallback(async () => {
     const supabase = createClient();
@@ -40,6 +43,20 @@ export default function PaymentsPage(): ReactNode {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("approved")
+      .eq("id", user.id)
+      .single();
+    setAccountApproved(profile?.approved ?? false);
+
+    const { data: settings } = await supabase
+      .from("merchant_settings")
+      .select("application_submitted_at")
+      .eq("merchant_id", user.id)
+      .maybeSingle();
+    setApplicationSubmitted(Boolean(settings?.application_submitted_at));
 
     const { data: keys } = await supabase
       .from("api_keys")
@@ -142,7 +159,7 @@ export default function PaymentsPage(): ReactNode {
           </button>
           <button
             onClick={() => setShowCreate(true)}
-            disabled={!apiKey}
+            disabled={!apiKey || accountApproved === false}
             className="flex items-center gap-2 rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
           >
             <Plus className="h-4 w-4" />
@@ -150,6 +167,19 @@ export default function PaymentsPage(): ReactNode {
           </button>
         </div>
       </div>
+
+      {accountApproved === false && (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+          <p className="text-sm font-medium text-foreground">
+            Payment links are disabled until your account is approved
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {applicationSubmitted
+              ? "Your application is in review. You will be able to generate links here after approval."
+              : "Complete onboarding from your dashboard home if you have not submitted an application yet."}
+          </p>
+        </div>
+      )}
 
       {!apiKey && (
         <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
