@@ -34,22 +34,12 @@ create policy "Users can update own profile"
 drop policy if exists "Admins can view all profiles" on public.profiles;
 create policy "Admins can view all profiles"
   on public.profiles for select
-  using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using (public.is_platform_admin());
 
 drop policy if exists "Admins can update all profiles" on public.profiles;
 create policy "Admins can update all profiles"
   on public.profiles for update
-  using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using (public.is_platform_admin());
 
 create or replace function public.handle_new_user()
 returns trigger as $$
@@ -91,6 +81,29 @@ $$;
 revoke all on function public.get_session_profile() from public;
 grant execute on function public.get_session_profile() to authenticated;
 grant execute on function public.get_session_profile() to service_role;
+
+-- Admin checks for RLS must NOT subquery public.profiles directly from a
+-- profiles policy (infinite recursion). Use this definer helper instead.
+create or replace function public.is_platform_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select coalesce(
+    (
+      select p.role = 'admin'
+      from public.profiles p
+      where p.id = auth.uid()
+    ),
+    false
+  );
+$$;
+
+revoke all on function public.is_platform_admin() from public;
+grant execute on function public.is_platform_admin() to authenticated;
+grant execute on function public.is_platform_admin() to service_role;
 
 
 -- ============================================================================
@@ -180,22 +193,12 @@ create policy "Merchants can update own settings"
 drop policy if exists "Admins can view all settings" on public.merchant_settings;
 create policy "Admins can view all settings"
   on public.merchant_settings for select
-  using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using (public.is_platform_admin());
 
 drop policy if exists "Admins can update all settings" on public.merchant_settings;
 create policy "Admins can update all settings"
   on public.merchant_settings for update
-  using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using (public.is_platform_admin());
 
 
 -- ============================================================================
@@ -218,18 +221,8 @@ alter table public.merchant_payram_credentials enable row level security;
 drop policy if exists "Admins manage merchant PayRam credentials" on public.merchant_payram_credentials;
 create policy "Admins manage merchant PayRam credentials"
   on public.merchant_payram_credentials for all
-  using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
-  )
-  with check (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using (public.is_platform_admin())
+  with check (public.is_platform_admin());
 
 -- One PayRam API key = one processor project; prevent assigning the same key to two merchants.
 create unique index if not exists idx_merchant_payram_credentials_api_key_unique
@@ -278,12 +271,7 @@ create policy "Merchants can delete own API keys"
 drop policy if exists "Admins can view all API keys" on public.api_keys;
 create policy "Admins can view all API keys"
   on public.api_keys for select
-  using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using (public.is_platform_admin());
 
 
 -- ============================================================================
@@ -325,12 +313,7 @@ create policy "Merchants can view own transactions"
 drop policy if exists "Admins can view all transactions" on public.transactions;
 create policy "Admins can view all transactions"
   on public.transactions for select
-  using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using (public.is_platform_admin());
 
 
 -- ============================================================================
