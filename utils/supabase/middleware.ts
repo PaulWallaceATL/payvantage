@@ -1,5 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import {
+  getSessionProfileForUser,
+  isAdminRole,
+} from "@/lib/auth/session-profile";
 
 export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env["NEXT_PUBLIC_SUPABASE_URL"];
@@ -49,14 +53,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && isProtected && !pathname.includes("/onboarding")) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("onboarded, role")
-      .eq("id", user.id)
-      .single();
-
-    const roleNorm = (profile?.role ?? "").trim().toLowerCase();
-    const isAdmin = roleNorm === "admin";
+    const sessionProfile = await getSessionProfileForUser(supabase, user.id);
+    const isAdmin = isAdminRole(sessionProfile?.role);
 
     if (
       isAdmin &&
@@ -69,8 +67,8 @@ export async function updateSession(request: NextRequest) {
     }
 
     if (
-      profile &&
-      !profile.onboarded &&
+      sessionProfile &&
+      !sessionProfile.onboarded &&
       !isAdmin &&
       pathname.startsWith("/dashboard")
     ) {

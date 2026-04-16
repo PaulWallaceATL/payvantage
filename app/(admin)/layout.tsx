@@ -1,4 +1,8 @@
 import { AdminSidebar } from "@/components/dashboard/admin-sidebar";
+import {
+  getSessionProfileForUser,
+  isAdminRole,
+} from "@/lib/auth/session-profile";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
@@ -19,16 +23,8 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
-  // Check admin role from profiles table
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  const isAdmin =
-    (profile?.role ?? "").trim().toLowerCase() === "admin";
-  if (!isAdmin) {
+  const sessionProfile = await getSessionProfileForUser(supabase, user.id);
+  if (!isAdminRole(sessionProfile?.role)) {
     redirect("/dashboard");
   }
 

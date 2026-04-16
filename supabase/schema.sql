@@ -69,6 +69,29 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
+-- Used by Next.js middleware / layouts: reads role without going through RLS,
+-- so admin promotion in SQL is always visible on the next request.
+create or replace function public.get_session_profile()
+returns jsonb
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select jsonb_build_object(
+    'role', p.role,
+    'onboarded', p.onboarded,
+    'approved', p.approved
+  )
+  from public.profiles p
+  where p.id = auth.uid()
+  limit 1;
+$$;
+
+revoke all on function public.get_session_profile() from public;
+grant execute on function public.get_session_profile() to authenticated;
+grant execute on function public.get_session_profile() to service_role;
+
 
 -- ============================================================================
 -- MERCHANT SETTINGS (includes business verification / KYC fields)

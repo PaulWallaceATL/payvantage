@@ -1,4 +1,8 @@
 import { Sidebar } from "@/components/dashboard/sidebar";
+import {
+  getSessionProfileForUser,
+  isAdminRole,
+} from "@/lib/auth/session-profile";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
@@ -19,15 +23,9 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("onboarded, role, approved")
-    .eq("id", user.id)
-    .single();
+  const sessionProfile = await getSessionProfileForUser(supabase, user.id);
 
-  const isAdmin =
-    (profile?.role ?? "").trim().toLowerCase() === "admin";
-  if (isAdmin) {
+  if (isAdminRole(sessionProfile?.role)) {
     redirect("/admin");
   }
 
@@ -39,13 +37,13 @@ export default async function DashboardLayout({
 
   const showApplicationReview =
     Boolean(merchantRow?.application_submitted_at) &&
-    profile?.approved === false;
+    sessionProfile?.approved === false;
 
   return (
     <div className="flex min-h-screen">
       <Sidebar
         user={{ email: user.email ?? "", id: user.id }}
-        onboarded={profile?.onboarded ?? false}
+        onboarded={sessionProfile?.onboarded ?? false}
       />
       <main className="flex-1 overflow-y-auto bg-background p-6 lg:p-8">
         {showApplicationReview && (
