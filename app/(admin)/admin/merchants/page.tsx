@@ -92,9 +92,28 @@ type Merchant = {
   merchant_payram_credentials: PayramCredentialRow[] | null;
 };
 
+const MERCHANT_SETTINGS_LIST_COLUMNS = `
+           company_name, legal_business_name, business_registration_number, country,
+           business_address, city, state_province, postal_code,
+           representative_first_name, representative_last_name,
+           representative_email, representative_phone,
+           business_type, business_description, expected_monthly_volume,
+           website_url, webhook_url, wallet_address, cold_wallet_address, settlement_notes,
+           payram_success_redirect_url, payram_cancel_redirect_url,
+           application_submitted_at, preferred_chain,
+           verification_status, verification_notes,
+           payment_rail, fallback_rail
+         `;
+
 export default function MerchantsPage(): ReactNode {
   const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [merchantsListError, setMerchantsListError] = useState<string | null>(
+    null
+  );
+  const [merchantsListWarning, setMerchantsListWarning] = useState<
+    string | null
+  >(null);
   const [acting, setActing] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [savingRail, setSavingRail] = useState<string | null>(null);
@@ -118,29 +137,51 @@ export default function MerchantsPage(): ReactNode {
 
   const loadMerchants = useCallback(async () => {
     const supabase = createClient();
-    const { data } = await supabase
+    setMerchantsListError(null);
+    setMerchantsListWarning(null);
+    await supabase.auth.getUser();
+
+    const baseSelect = `id, email, company_name, approved, onboarded, created_at,
+         merchant_settings (${MERCHANT_SETTINGS_LIST_COLUMNS})`;
+
+    const { data, error } = await supabase
       .from("profiles")
       .select(
-        `id, email, company_name, approved, onboarded, created_at,
-         merchant_settings (
-           company_name, legal_business_name, business_registration_number, country,
-           business_address, city, state_province, postal_code,
-           representative_first_name, representative_last_name,
-           representative_email, representative_phone,
-           business_type, business_description, expected_monthly_volume,
-           website_url, webhook_url, wallet_address, cold_wallet_address, settlement_notes,
-           payram_success_redirect_url, payram_cancel_redirect_url,
-           application_submitted_at, preferred_chain,
-           verification_status, verification_notes,
-           payment_rail, fallback_rail
-         ),
+        `${baseSelect},
          merchant_payram_credentials (
            payram_project_id, payram_project_name, payram_base_url
          )`
       )
       .eq("role", "merchant")
       .order("created_at", { ascending: false });
-    setMerchants((data ?? []) as Merchant[]);
+
+    if (!error && data) {
+      setMerchants(data as Merchant[]);
+      setLoading(false);
+      return;
+    }
+
+    const { data: slimData, error: slimError } = await supabase
+      .from("profiles")
+      .select(baseSelect)
+      .eq("role", "merchant")
+      .order("created_at", { ascending: false });
+
+    if (slimError) {
+      setMerchants([]);
+      setMerchantsListError(slimError.message);
+      setLoading(false);
+      return;
+    }
+
+    const patched = (slimData ?? []).map((row) => ({
+      ...row,
+      merchant_payram_credentials: null,
+    }));
+    setMerchants(patched as Merchant[]);
+    setMerchantsListWarning(
+      "Merchant list loaded without PayRam credential fields. If this persists, apply the latest database schema (including `merchant_payram_credentials`)."
+    );
     setLoading(false);
   }, []);
 
@@ -321,10 +362,24 @@ export default function MerchantsPage(): ReactNode {
         </p>
       </div>
 
+      {merchantsListError ? (
+        <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {merchantsListError}
+        </div>
+      ) : null}
+
+      {merchantsListWarning ? (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-950 dark:text-amber-100">
+          {merchantsListWarning}
+        </div>
+      ) : null}
+
       {merchants.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border py-12 text-center">
           <p className="text-sm text-muted-foreground">
-            No merchants have registered yet.
+            {merchantsListError
+              ? "Fix the error above, then refresh this page."
+              : "No merchants have registered yet."}
           </p>
         </div>
       ) : (

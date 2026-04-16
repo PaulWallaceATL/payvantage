@@ -31,6 +31,7 @@ function pickProfile(
 
 export default async function AdminTransactionsPage(): Promise<ReactNode> {
   const supabase = await createClient();
+  await supabase.auth.getUser();
 
   const { data: rows, error } = await supabase
     .from("transactions")

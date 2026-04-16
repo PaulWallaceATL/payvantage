@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard(): Promise<ReactNode> {
   const supabase = await createClient();
+  await supabase.auth.getUser();
 
   const { count: merchantCount } = await supabase
     .from("profiles")
