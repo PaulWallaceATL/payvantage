@@ -1,10 +1,13 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
 import {
+  Ban,
   Check,
   ChevronDown,
   ChevronUp,
+  ExternalLink,
   Loader2,
   ShieldCheck,
   ShieldX,
@@ -29,6 +32,7 @@ function railLabel(value: string): string {
 }
 
 type MerchantSettings = {
+  company_name: string | null;
   legal_business_name: string | null;
   business_registration_number: string | null;
   country: string | null;
@@ -44,6 +48,7 @@ type MerchantSettings = {
   business_description: string | null;
   expected_monthly_volume: string | null;
   website_url: string | null;
+  webhook_url: string | null;
   wallet_address: string | null;
   cold_wallet_address: string | null;
   settlement_notes: string | null;
@@ -61,6 +66,19 @@ type PayramCredentialRow = {
   payram_project_id: string | null;
   payram_project_name: string | null;
   payram_base_url: string | null;
+};
+
+type MerchantTransaction = {
+  id: string;
+  created_at: string;
+  amount: number;
+  currency: string;
+  status: string;
+  customer_email: string | null;
+  payment_rail: string | null;
+  provider_order_id: string | null;
+  payram_reference_id: string | null;
+  payment_url: string | null;
 };
 
 type Merchant = {
@@ -86,6 +104,17 @@ export default function MerchantsPage(): ReactNode {
   const [payramBaseUrl, setPayramBaseUrl] = useState("");
   const [savingPayram, setSavingPayram] = useState(false);
   const [payramError, setPayramError] = useState<string | null>(null);
+  const [merchantTx, setMerchantTx] = useState<
+    Record<string, MerchantTransaction[]>
+  >({});
+  const [loadingTxMerchantId, setLoadingTxMerchantId] = useState<
+    string | null
+  >(null);
+  const [verificationNotesDraft, setVerificationNotesDraft] =
+    useState("");
+  const [savingNotesMerchantId, setSavingNotesMerchantId] = useState<
+    string | null
+  >(null);
 
   const loadMerchants = useCallback(async () => {
     const supabase = createClient();
@@ -94,12 +123,12 @@ export default function MerchantsPage(): ReactNode {
       .select(
         `id, email, company_name, approved, onboarded, created_at,
          merchant_settings (
-           legal_business_name, business_registration_number, country,
+           company_name, legal_business_name, business_registration_number, country,
            business_address, city, state_province, postal_code,
            representative_first_name, representative_last_name,
            representative_email, representative_phone,
            business_type, business_description, expected_monthly_volume,
-           website_url, wallet_address, cold_wallet_address, settlement_notes,
+           website_url, webhook_url, wallet_address, cold_wallet_address, settlement_notes,
            payram_success_redirect_url, payram_cancel_redirect_url,
            application_submitted_at, preferred_chain,
            verification_status, verification_notes,
@@ -135,6 +164,48 @@ export default function MerchantsPage(): ReactNode {
     setPayramApiKey("");
     setPayramBaseUrl(creds?.payram_base_url ?? "");
   }, [expanded, merchants]);
+
+  useEffect(() => {
+    if (!expanded) {
+      setVerificationNotesDraft("");
+      return;
+    }
+    const row = merchants.find((x) => x.id === expanded);
+    const s = getSettingsFromMerchant(row);
+    setVerificationNotesDraft(s?.verification_notes ?? "");
+  }, [expanded, merchants]);
+
+  useEffect(() => {
+    if (!expanded) return;
+    let cancelled = false;
+    setLoadingTxMerchantId(expanded);
+    const supabase = createClient();
+    void supabase
+      .from("transactions")
+      .select(
+        "id, created_at, amount, currency, status, customer_email, payment_rail, provider_order_id, payram_reference_id, payment_url"
+      )
+      .eq("merchant_id", expanded)
+      .order("created_at", { ascending: false })
+      .limit(50)
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        setLoadingTxMerchantId(null);
+        if (error) return;
+        setMerchantTx((prev) => ({
+          ...prev,
+          [expanded]: (data ?? []) as MerchantTransaction[],
+        }));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [expanded]);
+
+  function getSettingsFromMerchant(m: Merchant | undefined): MerchantSettings | null {
+    if (!m?.merchant_settings?.[0]) return null;
+    return m.merchant_settings[0];
+  }
 
   async function handleSavePayramCredentials(merchantId: string) {
     setPayramError(null);
@@ -185,6 +256,31 @@ export default function MerchantsPage(): ReactNode {
     setActing(null);
   }
 
+  async function handleDeny(merchantId: string) {
+    if (
+      !window.confirm(
+        "Reject this merchant application? Their account will stay inactive until you approve them again."
+      )
+    ) {
+      return;
+    }
+    await handleApproval(merchantId, false);
+  }
+
+  async function handleSaveVerificationNotes(merchantId: string) {
+    setSavingNotesMerchantId(merchantId);
+    const supabase = createClient();
+    await supabase
+      .from("merchant_settings")
+      .update({
+        verification_notes: verificationNotesDraft.trim() || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("merchant_id", merchantId);
+    await loadMerchants();
+    setSavingNotesMerchantId(null);
+  }
+
   async function handleRailChange(
     merchantId: string,
     field: "payment_rail" | "fallback_rail",
@@ -204,8 +300,7 @@ export default function MerchantsPage(): ReactNode {
   }
 
   function getSettings(m: Merchant): MerchantSettings | null {
-    if (!m.merchant_settings || m.merchant_settings.length === 0) return null;
-    return m.merchant_settings[0] ?? null;
+    return getSettingsFromMerchant(m);
   }
 
   if (loading) {
@@ -269,7 +364,7 @@ export default function MerchantsPage(): ReactNode {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                         RAIL_COLORS[currentRail] ?? RAIL_COLORS.payram
@@ -279,13 +374,27 @@ export default function MerchantsPage(): ReactNode {
                     </span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        m.approved
+                          ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                          : "bg-amber-500/10 text-amber-800 dark:text-amber-300"
+                      }`}
+                    >
+                      {m.approved ? "Account active" : "Account pending"}
+                    </span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                         m.onboarded
                           ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
                           : "bg-muted text-muted-foreground"
                       }`}
                     >
-                      {m.onboarded ? "Onboarded" : "Not onboarded"}
+                      {m.onboarded ? "Form submitted" : "Not onboarded"}
                     </span>
+                    {settings?.application_submitted_at && !m.approved && (
+                      <span className="rounded-full bg-violet-500/15 px-2 py-0.5 text-xs font-medium text-violet-700 dark:text-violet-300">
+                        Application in queue
+                      </span>
+                    )}
                     <span
                       className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                         vStatus === "verified"
@@ -300,29 +409,58 @@ export default function MerchantsPage(): ReactNode {
                       ) : vStatus === "rejected" ? (
                         <ShieldX className="h-3 w-3" />
                       ) : null}
-                      {vStatus.charAt(0).toUpperCase() + vStatus.slice(1)}
+                      Review: {vStatus.charAt(0).toUpperCase() + vStatus.slice(1)}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex flex-shrink-0 flex-wrap items-center justify-end gap-1">
                     {acting === m.id ? (
                       <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                     ) : m.approved ? (
                       <button
-                        onClick={() => handleApproval(m.id, false)}
+                        type="button"
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              "Revoke this merchant? They will no longer be able to create payment links."
+                            )
+                          ) {
+                            void handleApproval(m.id, false);
+                          }
+                        }}
                         className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-500/10"
                       >
                         <X className="h-3.5 w-3.5" />
-                        Revoke
+                        Revoke access
                       </button>
-                    ) : (
+                    ) : vStatus === "rejected" ? (
                       <button
+                        type="button"
                         onClick={() => handleApproval(m.id, true)}
                         className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-emerald-600 transition-colors hover:bg-emerald-500/10 dark:text-emerald-400"
                       >
                         <Check className="h-3.5 w-3.5" />
-                        Approve
+                        Approve (reinstate)
                       </button>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleApproval(m.id, true)}
+                          className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-emerald-600 transition-colors hover:bg-emerald-500/10 dark:text-emerald-400"
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeny(m.id)}
+                          className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-500/10"
+                        >
+                          <Ban className="h-3.5 w-3.5" />
+                          Deny
+                        </button>
+                      </>
                     )}
                   </div>
 
@@ -334,7 +472,146 @@ export default function MerchantsPage(): ReactNode {
                 {/* Expanded detail */}
                 {isExpanded && settings && (
                   <div className="border-t border-border px-4 pb-4 pt-3">
-                    {/* Rail routing controls */}
+                    <div className="mb-4 rounded-lg border border-blue-500/20 bg-blue-500/5 p-4">
+                      <h4 className="text-sm font-semibold text-foreground">
+                        Application submission
+                      </h4>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Data from the merchant onboarding form. Use{" "}
+                        <span className="font-medium text-foreground">
+                          Approve
+                        </span>{" "}
+                        or{" "}
+                        <span className="font-medium text-foreground">Deny</span>{" "}
+                        in the row above to control platform access.
+                      </p>
+                    </div>
+
+                    <div className="mb-4 rounded-lg border border-border bg-background/50 p-3">
+                      <p className="mb-2 text-xs font-medium text-foreground">
+                        Internal review notes
+                      </p>
+                      <textarea
+                        value={verificationNotesDraft}
+                        onChange={(e) =>
+                          setVerificationNotesDraft(e.target.value)
+                        }
+                        rows={3}
+                        className="w-full rounded-md border border-border bg-background px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+                        placeholder="Risk notes, document references, follow-up items…"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleSaveVerificationNotes(m.id)}
+                        disabled={savingNotesMerchantId === m.id}
+                        className="mt-2 rounded-lg bg-foreground px-3 py-1.5 text-xs font-medium text-background hover:bg-foreground/90 disabled:opacity-50"
+                      >
+                        {savingNotesMerchantId === m.id
+                          ? "Saving…"
+                          : "Save review notes"}
+                      </button>
+                    </div>
+
+                    <div className="mb-4">
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold text-foreground">
+                          Recent transactions
+                        </h4>
+                        <Link
+                          href="/admin/transactions"
+                          className="text-xs font-medium text-accent hover:underline"
+                        >
+                          All platform transactions →
+                        </Link>
+                      </div>
+                      {loadingTxMerchantId === m.id ? (
+                        <div className="flex h-24 items-center justify-center rounded-lg border border-border bg-muted/20">
+                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                        </div>
+                      ) : (
+                        <div className="overflow-x-auto rounded-lg border border-border">
+                          <table className="w-full min-w-[640px] text-left text-xs">
+                            <thead>
+                              <tr className="border-b border-border bg-muted/40">
+                                <th className="px-2 py-2 font-medium text-muted-foreground">
+                                  Time
+                                </th>
+                                <th className="px-2 py-2 font-medium text-muted-foreground">
+                                  Amount
+                                </th>
+                                <th className="px-2 py-2 font-medium text-muted-foreground">
+                                  Status
+                                </th>
+                                <th className="px-2 py-2 font-medium text-muted-foreground">
+                                  Rail
+                                </th>
+                                <th className="px-2 py-2 font-medium text-muted-foreground">
+                                  Customer
+                                </th>
+                                <th className="px-2 py-2 font-medium text-muted-foreground">
+                                  Ref
+                                </th>
+                                <th className="px-2 py-2 font-medium text-muted-foreground">
+                                  Link
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                              {(merchantTx[m.id] ?? []).length === 0 ? (
+                                <tr>
+                                  <td
+                                    colSpan={7}
+                                    className="px-2 py-6 text-center text-muted-foreground"
+                                  >
+                                    No transactions for this merchant yet.
+                                  </td>
+                                </tr>
+                              ) : (
+                                (merchantTx[m.id] ?? []).map((t) => (
+                                  <tr key={t.id}>
+                                    <td className="whitespace-nowrap px-2 py-2 text-muted-foreground">
+                                      {new Date(t.created_at).toLocaleString()}
+                                    </td>
+                                    <td className="whitespace-nowrap px-2 py-2 font-medium">
+                                      ${Number(t.amount).toFixed(2)}{" "}
+                                      {t.currency}
+                                    </td>
+                                    <td className="px-2 py-2">{t.status}</td>
+                                    <td className="px-2 py-2 text-muted-foreground">
+                                      {t.payment_rail ?? "—"}
+                                    </td>
+                                    <td className="max-w-[120px] truncate px-2 py-2 text-muted-foreground">
+                                      {t.customer_email ?? "—"}
+                                    </td>
+                                    <td className="max-w-[100px] truncate px-2 py-2 font-mono text-muted-foreground">
+                                      {t.provider_order_id ??
+                                        t.payram_reference_id ??
+                                        "—"}
+                                    </td>
+                                    <td className="px-2 py-2">
+                                      {t.payment_url ? (
+                                        <a
+                                          href={t.payment_url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center gap-0.5 text-accent hover:underline"
+                                        >
+                                          Open
+                                          <ExternalLink className="h-3 w-3" />
+                                        </a>
+                                      ) : (
+                                        "—"
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="mb-4 rounded-lg border border-violet-500/20 bg-violet-500/5 p-3">
                       <p className="mb-2 text-xs font-medium text-foreground">
                         PayRam project (per-merchant API key)
@@ -504,6 +781,10 @@ export default function MerchantsPage(): ReactNode {
                         }
                       />
                       <Detail
+                        label="Company (settings)"
+                        value={settings.company_name}
+                      />
+                      <Detail
                         label="Expected volume"
                         value={settings.expected_monthly_volume}
                       />
@@ -535,9 +816,10 @@ export default function MerchantsPage(): ReactNode {
                         label="Website"
                         value={settings.website_url}
                       />
+                      <Detail label="Webhook URL" value={settings.webhook_url} />
                       <Detail
-                        label="Business description"
-                        value={settings.business_description}
+                        label="Saved review notes"
+                        value={settings.verification_notes}
                       />
                       <Detail
                         label="Success redirect URL"
@@ -583,6 +865,32 @@ export default function MerchantsPage(): ReactNode {
                         value={settings.preferred_chain}
                       />
                     </div>
+
+                    {(settings.business_description ||
+                      settings.settlement_notes) && (
+                      <div className="mb-4 grid gap-4 sm:grid-cols-2">
+                        {settings.business_description ? (
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">
+                              Business description (full)
+                            </p>
+                            <p className="mt-1 max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-3 text-sm text-foreground">
+                              {settings.business_description}
+                            </p>
+                          </div>
+                        ) : null}
+                        {settings.settlement_notes ? (
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">
+                              Wallet / payout notes (full)
+                            </p>
+                            <p className="mt-1 max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-3 text-sm text-foreground">
+                              {settings.settlement_notes}
+                            </p>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
                   </div>
                 )}
 

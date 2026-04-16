@@ -11,7 +11,7 @@ export function StatCard({
 }: {
   title: string;
   value: string;
-  description?: string;
+  description?: ReactNode;
   icon: LucideIcon;
   className?: string;
 }): ReactNode {
@@ -27,8 +27,8 @@ export function StatCard({
         <Icon className="h-4 w-4 text-muted-foreground" />
       </div>
       <p className="mt-2 text-3xl font-semibold text-foreground">{value}</p>
-      {description && (
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      {description != null && description !== "" && (
+        <div className="mt-1 text-sm text-muted-foreground">{description}</div>
       )}
     </div>
   );

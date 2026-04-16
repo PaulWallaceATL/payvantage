@@ -1,7 +1,10 @@
 import { StatCard } from "@/components/dashboard/stat-card";
 import { createClient } from "@/utils/supabase/server";
-import { Activity, DollarSign, Server, Users } from "lucide-react";
+import Link from "next/link";
+import { Activity, DollarSign, FileText, Server, Users } from "lucide-react";
 import type { ReactNode } from "react";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard(): Promise<ReactNode> {
   const supabase = await createClient();
@@ -29,6 +32,24 @@ export default async function AdminDashboard(): Promise<ReactNode> {
   const completedCount = all.filter((t) => t.status === "completed").length;
   const successRate =
     totalCount > 0 ? ((completedCount / totalCount) * 100).toFixed(1) : "—";
+
+  const { data: submittedSettings } = await supabase
+    .from("merchant_settings")
+    .select("merchant_id")
+    .not("application_submitted_at", "is", null);
+
+  const submittedIds =
+    submittedSettings?.map((r) => r.merchant_id).filter(Boolean) ?? [];
+  let pendingApplicationCount = 0;
+  if (submittedIds.length > 0) {
+    const { data: pendingProfiles } = await supabase
+      .from("profiles")
+      .select("id")
+      .in("id", submittedIds)
+      .eq("role", "merchant")
+      .eq("approved", false);
+    pendingApplicationCount = pendingProfiles?.length ?? 0;
+  }
 
   const volumeByStatus = [
     {
@@ -87,7 +108,20 @@ export default async function AdminDashboard(): Promise<ReactNode> {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <StatCard
+          title="Applications in review"
+          value={pendingApplicationCount.toString()}
+          description={
+            <Link
+              href="/admin/merchants"
+              className="text-accent underline underline-offset-2"
+            >
+              Open Merchants to approve or deny
+            </Link>
+          }
+          icon={FileText}
+        />
         <StatCard
           title="Total Platform Volume"
           value={`$${totalVolume.toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
@@ -97,7 +131,17 @@ export default async function AdminDashboard(): Promise<ReactNode> {
         <StatCard
           title="Registered Merchants"
           value={(merchantCount ?? 0).toString()}
-          description={`${approvedCount ?? 0} approved`}
+          description={
+            <>
+              {approvedCount ?? 0} approved —{" "}
+              <Link
+                href="/admin/merchants"
+                className="text-accent underline underline-offset-2"
+              >
+                Manage
+              </Link>
+            </>
+          }
           icon={Users}
         />
         <StatCard

@@ -1,7 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, LogOut, Shield, Users } from "lucide-react";
+import {
+  LayoutDashboard,
+  LogOut,
+  Receipt,
+  Shield,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode } from "react";
@@ -10,6 +16,7 @@ import { createClient } from "@/utils/supabase/client";
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Merchants", href: "/admin/merchants", icon: Users },
+  { label: "Transactions", href: "/admin/transactions", icon: Receipt },
 ];
 
 export function AdminSidebar({
